@@ -5,6 +5,7 @@ pygame.init()
 
 FPS = 30 # frames per second settings
 fpsClock = pygame.time.Clock()
+DURATION = 0.1
 
 #Screen size
 SCREEN_X=400
@@ -21,79 +22,35 @@ SPRT_RECT_Y=LEN_SPRT_Y
 # Sprite sheet
 sheet = pygame.image.load('jubal_64.png') #Load the sheet
 
+
 # Global dictionary that contains all Surface objects
 IMAGESDICT = {
     'j_normal': sheet.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
     'j_rightface': sheet.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_rightstep1': sheet.subsurface(pygame.Rect(SPRT_RECT_X+LEN_SPRT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_rightstep2': sheet.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*2), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
     'j_leftface': sheet.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*3), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_leftstep1': sheet.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*4), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_leftstep2': sheet.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*5), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_shootingright1': sheet.subsurface(pygame.Rect(LEN_SPRT_X, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_shootingright2': sheet.subsurface(pygame.Rect(LEN_SPRT_X*2, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_shootingright3': sheet.subsurface(pygame.Rect(LEN_SPRT_X*3, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_shootingright4': sheet.subsurface(pygame.Rect(LEN_SPRT_X*4, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_shootingleft1': sheet.subsurface(pygame.Rect(LEN_SPRT_X*5, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_shootingleft2': sheet.subsurface(pygame.Rect(LEN_SPRT_X*6, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_shootingleft3': sheet.subsurface(pygame.Rect(LEN_SPRT_X*7, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_shootingleft4': sheet.subsurface(pygame.Rect(LEN_SPRT_X*8, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpRight1': sheet.subsurface(pygame.Rect(0, LEN_SPRT_Y*2, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpRight2': sheet.subsurface(pygame.Rect(LEN_SPRT_X*1, LEN_SPRT_Y*2, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpRight3': sheet.subsurface(pygame.Rect(LEN_SPRT_X*2, LEN_SPRT_Y*2, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpRight4': sheet.subsurface(pygame.Rect(LEN_SPRT_X*3, LEN_SPRT_Y*2, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpRight5': sheet.subsurface(pygame.Rect(LEN_SPRT_X*4, LEN_SPRT_Y*2, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpRight6': sheet.subsurface(pygame.Rect(LEN_SPRT_X*5, LEN_SPRT_Y*2, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpRight7': sheet.subsurface(pygame.Rect(LEN_SPRT_X*6, LEN_SPRT_Y*2, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpLeft1': sheet.subsurface(pygame.Rect(0, LEN_SPRT_Y*3, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpLeft2': sheet.subsurface(pygame.Rect(LEN_SPRT_X*1, LEN_SPRT_Y*3, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpLeft3': sheet.subsurface(pygame.Rect(LEN_SPRT_X*2, LEN_SPRT_Y*3, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpLeft4': sheet.subsurface(pygame.Rect(LEN_SPRT_X*3, LEN_SPRT_Y*3, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpLeft5': sheet.subsurface(pygame.Rect(LEN_SPRT_X*4, LEN_SPRT_Y*3, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpLeft6': sheet.subsurface(pygame.Rect(LEN_SPRT_X*5, LEN_SPRT_Y*3, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_jumpLeft7': sheet.subsurface(pygame.Rect(LEN_SPRT_X*6, LEN_SPRT_Y*3, LEN_SPRT_X, LEN_SPRT_Y))
-    }
+}
 
-rightStepList = [(IMAGESDICT['j_rightstep1'], 0.1),
-                 (IMAGESDICT['j_rightstep2'], 0.1)]
+animTypes = 'right_walk left_walk shoot_right shoot_left jump_right jump_left'.split()
 
-leftStepList = [(IMAGESDICT['j_leftstep1'], 0.1),
-                 (IMAGESDICT['j_leftstep2'], 0.1)]
-
-shootRightList = [(IMAGESDICT['j_shootingright1'], 0.1),
-                  (IMAGESDICT['j_shootingright2'], 0.1),
-                  (IMAGESDICT['j_shootingright3'], 0.1),
-                  (IMAGESDICT['j_shootingright4'], 0.1)]
-
-shootLeftList = [(IMAGESDICT['j_shootingleft1'], 0.1),
-                  (IMAGESDICT['j_shootingleft2'], 0.1),
-                  (IMAGESDICT['j_shootingleft3'], 0.1),
-                  (IMAGESDICT['j_shootingleft4'], 0.1)]
-
-jumpRightList = [(IMAGESDICT['j_jumpRight1'], 0.1),
-                (IMAGESDICT['j_jumpRight2'], 0.1),
-                (IMAGESDICT['j_jumpRight3'], 0.1),
-                (IMAGESDICT['j_jumpRight4'], 0.1),
-                (IMAGESDICT['j_jumpRight5'], 0.1),
-                (IMAGESDICT['j_jumpRight6'], 0.1),
-                (IMAGESDICT['j_jumpRight7'], 0.1)]
-
-jumpLeftList = [(IMAGESDICT['j_jumpLeft1'], 0.1),
-                (IMAGESDICT['j_jumpLeft2'], 0.1),
-                (IMAGESDICT['j_jumpLeft3'], 0.1),
-                (IMAGESDICT['j_jumpLeft4'], 0.1),
-                (IMAGESDICT['j_jumpLeft5'], 0.1),
-                (IMAGESDICT['j_jumpLeft6'], 0.1),
-                (IMAGESDICT['j_jumpLeft7'], 0.1)]
+# These tuples contain (base_x, base_y, numOfFrames)
+# numOfFrames is in the x-direction
+animTypesInfo = {
+    'right_walk':   (SPRT_RECT_X+LEN_SPRT_X, SPRT_RECT_Y, 2),
+    'left_walk':    (SPRT_RECT_X+(LEN_SPRT_X*4), SPRT_RECT_Y, 2),
+    'shoot_right':  (LEN_SPRT_X, 0, 4),
+    'shoot_left':   (LEN_SPRT_X*5, 0, 4),
+    'jump_right':   (0, LEN_SPRT_Y*2, 7),
+    'jump_left':    (0, LEN_SPRT_Y*3, 7)
+}
 
 animObjs = {}
+for animType in animTypes:
+    xbase = (animTypesInfo[animType])[0]
+    ybase = (animTypesInfo[animType])[1]
+    numFrames = (animTypesInfo[animType])[2]
+    imagesAndDurations = [(sheet.subsurface(pygame.Rect(xbase+(LEN_SPRT_X*num), ybase, LEN_SPRT_X, LEN_SPRT_Y)), DURATION) for num in range(numFrames)]
+    animObjs[animType] = pyganim.PygAnimation(imagesAndDurations)
 
-animObjs['right_walk'] = pyganim.PygAnimation(rightStepList)
-animObjs['left_walk'] = pyganim.PygAnimation(leftStepList)
-animObjs['shoot_right'] = pyganim.PygAnimation(shootRightList)
-animObjs['shoot_left'] = pyganim.PygAnimation(shootLeftList)
-animObjs['jump_right'] = pyganim.PygAnimation(jumpRightList)
-animObjs['jump_left'] = pyganim.PygAnimation(jumpLeftList)
 
 moveConductor = pyganim.PygConductor(animObjs)
 
@@ -106,7 +63,6 @@ RIGHT = 'right'
 keyPressed = False
 
 DISPLAYSURF = pygame.display.set_mode((SCREEN_X, SCREEN_Y)) #Make the screen
-
 
 sheet.set_clip(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)) #find the sprite you want
 img = 'j_normal'
