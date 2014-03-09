@@ -19,8 +19,8 @@ LEN_SPRT_Y=64
 SPRT_RECT_X=0  
 SPRT_RECT_Y=LEN_SPRT_Y
 
-# Sprite sheet
-sheet = pygame.image.load('jubal_64.png') #Load the sheet
+# Load the sprite sheet
+sheet = pygame.image.load('jubal_64.png')
 
 
 # Global dictionary that contains all Surface objects
@@ -30,6 +30,7 @@ IMAGESDICT = {
     'j_leftface': sheet.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*3), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
 }
 
+# Define the different animation types
 animTypes = 'right_walk left_walk shoot_right shoot_left jump_right jump_left'.split()
 
 # These tuples contain (base_x, base_y, numOfFrames)
@@ -59,6 +60,8 @@ UP = 'up'
 DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
+
+FACING_RIGHT = True
 
 keyPressed = False
 
@@ -90,9 +93,11 @@ while True:
             # Handle key presses
             keyPressed = True
             if event.key == K_LEFT:
+                FACING_RIGHT = False
                 playerDirection = LEFT
                 moveLeft = True
             elif event.key == K_RIGHT:
+                FACING_RIGHT = True
                 playerDirection = RIGHT
                 moveRight = True
             elif event.key == K_UP:
@@ -115,23 +120,34 @@ while True:
                 playerDirection = RIGHT
             elif event.key == K_UP:
                 moveUp = False
-                playerDirection = UP
+                if FACING_RIGHT:
+                    playerDirection = RIGHT
+                else:
+                    playerDirection = LEFT
             elif event.key == K_DOWN:
                 moveDown = False
                 playerDirection = DOWN
             elif event.key == K_SPACE:
                 playerShooting = False
+                if FACING_RIGHT:
+                    playerDirection = RIGHT
+                else:
+                    playerDirection = LEFT
 
     if moveLeft or moveRight or moveUp or playerShooting:
         moveConductor.play()
-        if playerDirection == LEFT:
+        if playerShooting and FACING_RIGHT:
+            animObjs['shoot_right'].blit(DISPLAYSURF, position)
+        elif playerShooting and not FACING_RIGHT:
+            animObjs['shoot_left'].blit(DISPLAYSURF, position)
+        elif playerDirection == LEFT:
             animObjs['left_walk'].blit(DISPLAYSURF, position)
         elif playerDirection == RIGHT:
             animObjs['right_walk'].blit(DISPLAYSURF, position)
-        elif playerDirection == UP:
+        elif playerDirection == UP and FACING_RIGHT:
             animObjs['jump_right'].blit(DISPLAYSURF, position)
-        elif playerShooting:
-            animObjs['shoot_right'].blit(DISPLAYSURF, position)
+        elif playerDirection == UP and not FACING_RIGHT:
+            animObjs['jump_left'].blit(DISPLAYSURF, position)
     else:
         # Standing
         if playerDirection == LEFT:
