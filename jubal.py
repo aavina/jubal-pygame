@@ -54,10 +54,12 @@ for animType in animTypes:
     ybase = (animTypesInfo[animType])[1]
     numFrames = (animTypesInfo[animType])[2]
     imagesAndDurations = [(sheet.subsurface(pygame.Rect(xbase+(LEN_SPRT_X*num), ybase, LEN_SPRT_X, LEN_SPRT_Y)), DURATION) for num in range(numFrames)]
-    animObjs[animType] = pyganim.PygAnimation(imagesAndDurations)
+    loopforever = True
+    if(animType == 'shoot_right' or animType == 'shoot_left'):
+        loopforever = False
 
+    animObjs[animType] = pyganim.PygAnimation(imagesAndDurations, loop=loopforever)
 
-moveConductor = pyganim.PygConductor(animObjs)
 
 # Key variables
 UP = 'up'
@@ -83,7 +85,7 @@ middleY = SCREEN_Y/2 - LEN_SPRT_Y/2
 # Initialize starting position
 position = (middleX, middleY)
 
-moveUp = moveDown = moveLeft = moveRight = playerShooting = False
+moveUp = moveDown = moveLeft = moveRight = playerShooting = playerDirection = False
 
 while True:
     DISPLAYSURF.fill(BLACK)
@@ -91,11 +93,10 @@ while True:
     # Check for game events
     for event in pygame.event.get():
         # Reset player direction
-        playerDirection = None
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == KEYDOWN:
+        elif event.type == KEYDOWN and not playerShooting:
             # Handle key presses
             keyPressed = True
             if event.key == K_LEFT:
@@ -114,10 +115,16 @@ while True:
                 moveDown = True
             elif event.key == K_SPACE:
                 playerShooting = True
+                if FACING_RIGHT:
+                    animObjs['shoot_right'].play()
+                    playerDirection = RIGHT
+                else:
+                    animObjs['shoot_left'].play()
+                    playerDirection = LEFT
             elif event.key == K_ESCAPE:
                 pygame.quit()
                 sys.exit()
-        elif event.type == KEYUP:
+        elif event.type == KEYUP and not playerShooting:
             if event.key == K_LEFT:
                 moveLeft = False
                 playerDirection = LEFT
@@ -134,7 +141,6 @@ while True:
                 moveDown = False
                 playerDirection = DOWN
             elif event.key == K_SPACE:
-                playerShooting = False
                 if FACING_RIGHT:
                     playerDirection = RIGHT
                 else:
@@ -142,26 +148,39 @@ while True:
 
     # Check for movement
     if moveLeft or moveRight or moveUp or playerShooting:
-        moveConductor.play()
         if playerShooting and FACING_RIGHT:
-            animObjs['shoot_right'].blit(DISPLAYSURF, position)
+            if animObjs['shoot_right'].isFinished():
+                playerShooting = False
+                playerDirection = RIGHT
+                DISPLAYSURF.blit(IMAGESDICT['j_rightface'],position)
+            else:
+                animObjs['shoot_right'].blit(DISPLAYSURF, position)
         elif playerShooting and not FACING_RIGHT:
-            animObjs['shoot_left'].blit(DISPLAYSURF, position)
+            if animObjs['shoot_left'].isFinished():
+                playerShooting = False
+                playerDirection = LEFT
+                DISPLAYSURF.blit(IMAGESDICT['j_leftface'],position)
+            else:
+                animObjs['shoot_left'].blit(DISPLAYSURF, position)
         elif playerDirection == LEFT:
             mv_x = position[0] - MOVEMENT_RATE_X
             mv_y = position[1]
             if(mv_x > 0):
                 position = (mv_x, mv_y)
+            animObjs['left_walk'].play()
             animObjs['left_walk'].blit(DISPLAYSURF, position)
         elif playerDirection == RIGHT:
             mv_x = position[0] + MOVEMENT_RATE_X
             mv_y = position[1]
             if((mv_x + LEN_SPRT_X) < SCREEN_X):
                 position = (mv_x, mv_y)
+            animObjs['right_walk'].play()
             animObjs['right_walk'].blit(DISPLAYSURF, position)
         elif playerDirection == UP and FACING_RIGHT:
+            animObjs['jump_right'].play()
             animObjs['jump_right'].blit(DISPLAYSURF, position)
         elif playerDirection == UP and not FACING_RIGHT:
+            animObjs['jump_left'].play()
             animObjs['jump_left'].blit(DISPLAYSURF, position)
     else:
         # Standing
