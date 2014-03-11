@@ -21,7 +21,7 @@ SPRT_RECT_Y=LEN_SPRT_Y
 
 # Rate of movement
 MOVEMENT_RATE_X = 4
-MOVEMENT_RATE_Y = 2
+MOVEMENT_RATE_Y = 4
 
 # Load the sprite sheet
 sheet = pygame.image.load('jubal_64.png')
@@ -79,14 +79,17 @@ jubal = IMAGESDICT[img]
 
 BLACK = (0,0,0)
 
-middleX = SCREEN_X/2 - LEN_SPRT_X/2
-middleY = SCREEN_Y/2 - LEN_SPRT_Y/2
+# Calculate starting position
+startX = SCREEN_X/2 - LEN_SPRT_X/2
+startY = SCREEN_Y - LEN_SPRT_Y
 
 # Initialize starting position
-position = (middleX, middleY)
+position = (startX, startY)
 
-moveUp = moveDown = moveLeft = moveRight = playerShooting = playerDirection = False
+moveDown = moveLeft = moveRight = playerShooting = playerDirection = False
+playerJumping = playerFalling = False
 
+jumpClock = 0
 while True:
     DISPLAYSURF.fill(BLACK)
 
@@ -107,9 +110,9 @@ while True:
                 FACING_RIGHT = True
                 playerDirection = RIGHT
                 moveRight = True
-            elif event.key == K_UP:
-                playerDirection = UP
-                moveUp = True
+            elif event.key == K_UP and not playerJumping and not playerFalling:
+                playerJumping = True
+                jumpClock = pygame.time.get_ticks()
             elif event.key == K_DOWN:
                 playerDirection = DOWN
                 moveDown = True
@@ -132,7 +135,6 @@ while True:
                 moveRight = False
                 playerDirection = RIGHT
             elif event.key == K_UP:
-                moveUp = False
                 if FACING_RIGHT:
                     playerDirection = RIGHT
                 else:
@@ -147,7 +149,7 @@ while True:
                     playerDirection = LEFT
 
     # Check for movement
-    if moveLeft or moveRight or moveUp or playerShooting:
+    if moveLeft or moveRight or playerJumping or playerShooting or playerFalling:
         if playerShooting and FACING_RIGHT:
             if animObjs['shoot_right'].isFinished():
                 playerShooting = False
@@ -176,22 +178,54 @@ while True:
                 position = (mv_x, mv_y)
             animObjs['right_walk'].play()
             animObjs['right_walk'].blit(DISPLAYSURF, position)
-        elif playerDirection == UP and FACING_RIGHT:
+
+        # Falling Mechanics
+        if playerJumping and FACING_RIGHT:
+            mv_x = position[0]
+            mv_y = position[1] - MOVEMENT_RATE_Y
+            if(mv_y > 0):
+                position = (mv_x, mv_y)
             animObjs['jump_right'].play()
             animObjs['jump_right'].blit(DISPLAYSURF, position)
-        elif playerDirection == UP and not FACING_RIGHT:
+            if (pygame.time.get_ticks() - (jumpClock+200)) > 0:
+                jumpClock = 0
+                playerJumping = False
+                playerFalling = True
+        elif playerJumping and not FACING_RIGHT:
+            mv_x = position[0]
+            mv_y = position[1] - MOVEMENT_RATE_Y
+            if(mv_y > 0):
+                position = (mv_x, mv_y)
             animObjs['jump_left'].play()
             animObjs['jump_left'].blit(DISPLAYSURF, position)
+            if (pygame.time.get_ticks() - (jumpClock+200)) > 0:
+                jumpClock = 0
+                playerJumping = False
+                playerFalling = True
+        elif playerFalling and FACING_RIGHT:
+            mv_x = position[0]
+            mv_y = position[1] + MOVEMENT_RATE_Y
+            if((mv_y + LEN_SPRT_Y) < SCREEN_X):
+                position = (mv_x, mv_y)
+            else:
+                playerFalling = False
+            DISPLAYSURF.blit(IMAGESDICT['j_rightface'],position)
+        elif playerFalling and not FACING_RIGHT:
+            mv_x = position[0]
+            mv_y = position[1] + MOVEMENT_RATE_Y
+            if((mv_y + LEN_SPRT_Y) < SCREEN_X):
+                position = (mv_x, mv_y)
+            else:
+                playerFalling = False
+            DISPLAYSURF.blit(IMAGESDICT['j_leftface'],position)
     else:
         # Standing
-        if playerDirection == LEFT:
-            DISPLAYSURF.blit(IMAGESDICT['j_leftface'],position)
-        elif playerDirection == RIGHT:
-            DISPLAYSURF.blit(IMAGESDICT['j_rightface'],position)
-        elif playerDirection == UP:
-            DISPLAYSURF.blit(IMAGESDICT['j_rightface'],position)
-        elif playerDirection == DOWN:
+        if playerDirection == DOWN:
             DISPLAYSURF.blit(IMAGESDICT['j_normal'],position)
+        if FACING_RIGHT == False:
+            DISPLAYSURF.blit(IMAGESDICT['j_leftface'],position)
+        elif FACING_RIGHT:
+            DISPLAYSURF.blit(IMAGESDICT['j_rightface'],position)
 
     pygame.display.update()
     fpsClock.tick(FPS)
