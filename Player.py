@@ -88,11 +88,9 @@ class Player:
 				self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)
 
 		# Idle
-		if self.direction == NONE and self.facingRight:
-			print("drawing right face")
+		if self.direction == NONE and self.facingRight and not self.shooting:
 			self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
-		elif self.direction == NONE and not self.facingRight:
-			print("drawing left face")
+		elif self.direction == NONE and not self.facingRight and not self.shooting:
 			self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)
 
 
