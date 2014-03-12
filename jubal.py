@@ -1,5 +1,7 @@
 import pygame, sys, time, pyganim
 from pygame.locals import *
+from Player import Player
+from Input import Input
 
 pygame.init()
 
@@ -11,7 +13,7 @@ DURATION = 0.1
 SCREEN_X=400
 SCREEN_Y=400
 
-# This is the lentgh of the sprite
+# This is the length of the sprite
 LEN_SPRT_X=64
 LEN_SPRT_Y=64
 
@@ -19,23 +21,18 @@ LEN_SPRT_Y=64
 SPRT_RECT_X=0  
 SPRT_RECT_Y=LEN_SPRT_Y
 
-# Rate of movement
-MOVEMENT_RATE_X = 4
-MOVEMENT_RATE_Y = 4
-
-# Load the sprite sheet
-sheet = pygame.image.load('jubal_64.png')
-
+# Load the sprite SHEET
+SHEET = pygame.image.load('jubal_64.png')
 
 # Global dictionary that contains all Surface objects
 IMAGESDICT = {
-    'j_normal': sheet.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_rightface': sheet.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_leftface': sheet.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*3), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
+    'j_normal': SHEET.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
+    'j_rightface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
+    'j_leftface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*3), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
 }
 
 # Define the different animation types
-animTypes = 'right_walk left_walk shoot_right shoot_left jump_right jump_left'.split()
+animTypes = 'right_walk left_walk shoot_right shoot_left jump_right jump_left right_face left_face normal'.split()
 
 # These tuples contain (base_x, base_y, numOfFrames)
 # numOfFrames is in the x-direction
@@ -45,7 +42,10 @@ animTypesInfo = {
     'shoot_right':  (LEN_SPRT_X, 0, 4),
     'shoot_left':   (LEN_SPRT_X*5, 0, 4),
     'jump_right':   (0, LEN_SPRT_Y*2, 7),
-    'jump_left':    (0, LEN_SPRT_Y*3, 7)
+    'jump_left':    (0, LEN_SPRT_Y*3, 7),
+    'normal':       (0, 0, 1),
+    'right_face':   (0, LEN_SPRT_Y, 1),
+    'left_face':    (0, LEN_SPRT_Y*3, 1)
 }
 
 animObjs = {}
@@ -53,7 +53,7 @@ for animType in animTypes:
     xbase = (animTypesInfo[animType])[0]
     ybase = (animTypesInfo[animType])[1]
     numFrames = (animTypesInfo[animType])[2]
-    imagesAndDurations = [(sheet.subsurface(pygame.Rect(xbase+(LEN_SPRT_X*num), ybase, LEN_SPRT_X, LEN_SPRT_Y)), DURATION) for num in range(numFrames)]
+    imagesAndDurations = [(SHEET.subsurface(pygame.Rect(xbase+(LEN_SPRT_X*num), ybase, LEN_SPRT_X, LEN_SPRT_Y)), DURATION) for num in range(numFrames)]
     loopforever = True
     if(animType == 'shoot_right' or animType == 'shoot_left'):
         loopforever = False
@@ -67,30 +67,30 @@ DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
 
-FACING_RIGHT = True
-
-keyPressed = False
-
 DISPLAYSURF = pygame.display.set_mode((SCREEN_X, SCREEN_Y)) #Make the screen
 
-sheet.set_clip(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)) #find the sprite you want
-img = 'j_normal'
-jubal = IMAGESDICT[img]
+SHEET.set_clip(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)) #find the sprite you want
 
 BLACK = (0,0,0)
 
-# Calculate starting position
+# Calculate starting position of player
 startX = SCREEN_X/2 - LEN_SPRT_X/2
 startY = SCREEN_Y - LEN_SPRT_Y
 
-# Initialize starting position
-position = (startX, startY)
-
-moveDown = moveLeft = moveRight = playerShooting = playerDirection = False
-playerJumping = playerFalling = False
-
 jumpClock = 0
+
+# Hold info on keys pressed, held, released
+keyinput = Input()
+
+# Initialize Player
+player = Player(DISPLAYSURF, IMAGESDICT, LEN_SPRT_X, LEN_SPRT_Y, SCREEN_X, SCREEN_Y, animObjs, startX, startY)
+
+# Start game loop
 while True:
+    # Clear key info
+    keyinput.clearKeys()
+
+    # Draw screen black
     DISPLAYSURF.fill(BLACK)
 
     # Check for game events
@@ -99,54 +99,78 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == KEYDOWN and not playerShooting:
+        elif event.type == KEYDOWN:
             # Handle key presses
-            keyPressed = True
-            if event.key == K_LEFT:
-                FACING_RIGHT = False
-                playerDirection = LEFT
-                moveLeft = True
-            elif event.key == K_RIGHT:
-                FACING_RIGHT = True
-                playerDirection = RIGHT
-                moveRight = True
-            elif event.key == K_UP and not playerJumping and not playerFalling:
-                playerJumping = True
-                jumpClock = pygame.time.get_ticks()
-            elif event.key == K_DOWN:
-                playerDirection = DOWN
-                moveDown = True
-            elif event.key == K_SPACE:
-                playerShooting = True
-                if FACING_RIGHT:
-                    animObjs['shoot_right'].play()
-                    playerDirection = RIGHT
-                else:
-                    animObjs['shoot_left'].play()
-                    playerDirection = LEFT
-            elif event.key == K_ESCAPE:
-                pygame.quit()
-                sys.exit()
-        elif event.type == KEYUP and not playerShooting:
-            if event.key == K_LEFT:
-                moveLeft = False
-                playerDirection = LEFT
-            elif event.key == K_RIGHT:
-                moveRight = False
-                playerDirection = RIGHT
-            elif event.key == K_UP:
-                if FACING_RIGHT:
-                    playerDirection = RIGHT
-                else:
-                    playerDirection = LEFT
-            elif event.key == K_DOWN:
-                moveDown = False
-                playerDirection = DOWN
-            elif event.key == K_SPACE:
-                if FACING_RIGHT:
-                    playerDirection = RIGHT
-                else:
-                    playerDirection = LEFT
+            keyinput.keyDownEvent(event.key)
+        elif event.type == KEYUP:
+            keyinput.keyUpEvent(event.key)
+
+    # Player horizontal logic
+    if keyinput.isKeyHeld(K_LEFT) and keyinput.isKeyHeld(K_RIGHT):
+        player.stopMoving()
+    elif keyinput.isKeyHeld(K_LEFT):
+        player.moveLeft()
+    elif keyinput.isKeyHeld(K_RIGHT):
+        player.moveRight()
+    elif keyinput.wasKeyPressed(K_SPACE):
+        player.shoot()
+    elif keyinput.wasKeyPressed(K_UP):
+        player.jump()
+    elif keyinput.wasKeyPressed(K_ESCAPE):
+        pygame.quit()
+        sys.exit()
+    else:
+        player.stopMoving()
+
+    '''
+    if event.key == K_LEFT:
+        keyinput.keyDownEvent(event.key)
+        FACING_RIGHT = False
+        playerDirection = LEFT
+        moveLeft = True
+    elif event.key == K_RIGHT:
+        FACING_RIGHT = True
+        playerDirection = RIGHT
+        moveRight = True
+    elif event.key == K_UP and not playerJumping and not playerFalling:
+        playerJumping = True
+        jumpClock = pygame.time.get_ticks()
+    elif event.key == K_DOWN:
+        playerDirection = DOWN
+        moveDown = True
+    elif event.key == K_SPACE:
+        playerShooting = True
+        if FACING_RIGHT:
+            animObjs['shoot_right'].play()
+            playerDirection = RIGHT
+        else:
+            animObjs['shoot_left'].play()
+            playerDirection = LEFT
+    elif event.key == K_ESCAPE:
+        pygame.quit()
+        sys.exit()
+
+    # Key Up Logic
+#elif event.type == KEYUP and not playerShooting:
+    if event.key == K_LEFT:
+        moveLeft = False
+        playerDirection = LEFT
+    elif event.key == K_RIGHT:
+        moveRight = False
+        playerDirection = RIGHT
+    elif event.key == K_UP:
+        if FACING_RIGHT:
+            playerDirection = RIGHT
+        else:
+            playerDirection = LEFT
+    elif event.key == K_DOWN:
+        moveDown = False
+        playerDirection = DOWN
+    elif event.key == K_SPACE:
+        if FACING_RIGHT:
+            playerDirection = RIGHT
+        else:
+            playerDirection = LEFT
 
     # Check for movement
     if moveLeft or moveRight or playerJumping or playerShooting or playerFalling:
@@ -222,10 +246,13 @@ while True:
         # Standing
         if playerDirection == DOWN:
             DISPLAYSURF.blit(IMAGESDICT['j_normal'],position)
-        if FACING_RIGHT == False:
+        if FACING_RIGHT == False and playerDirection != DOWN:
             DISPLAYSURF.blit(IMAGESDICT['j_leftface'],position)
-        elif FACING_RIGHT:
+        elif FACING_RIGHT and playerDirection != DOWN:
             DISPLAYSURF.blit(IMAGESDICT['j_rightface'],position)
+    '''
+
+    player.draw()
 
     pygame.display.update()
     fpsClock.tick(FPS)
