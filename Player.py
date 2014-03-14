@@ -20,6 +20,7 @@ class Player:
 		self.jumping = False
 		self.falling = False
 		self.shooting = False
+		self.bulletcreated = False
 		self.jumpClock = 0
 		self.direction = NONE
 		self.bullets = []
@@ -28,24 +29,29 @@ class Player:
 	def draw(self):
 		if self.shooting and self.facingRight:
 			if self.graphics['shoot_right'].isFinished():
-				self.shooting = False
+				self.shooting = self.bulletcreated = False
 				self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
-				startx = self.position[0] + self.len_sprt_x
-				starty = self.position[1] + 22
-				bullet = Bullet(self.displaysurf, self.imagesdict, RIGHT, startx, starty)
-				self.bullets.append(bullet)
 			else:
 				self.graphics['shoot_right'].blit(self.displaysurf,self.position)
+				# Create bullet after gun explosion
+				if self.graphics['shoot_right']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
+					startx = self.position[0] + self.len_sprt_x
+					starty = self.position[1] + 22
+					bullet = Bullet(self.displaysurf, self.imagesdict, RIGHT, startx, starty)
+					self.bullets.append(bullet)
+					self.bulletcreated = True
 		elif self.shooting and not self.facingRight:
 			if self.graphics['shoot_left'].isFinished():
-				self.shooting = False
+				self.shooting = self.bulletcreated = False
 				self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)
-				startx = self.position[0]
-				starty = self.position[1] + 22
-				bullet = Bullet(self.displaysurf, self.imagesdict, LEFT, startx, starty)
-				self.bullets.append(bullet)
 			else:
 				self.graphics['shoot_left'].blit(self.displaysurf,self.position)
+				if self.graphics['shoot_left']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
+					startx = self.position[0]
+					starty = self.position[1] + 22
+					bullet = Bullet(self.displaysurf, self.imagesdict, LEFT, startx, starty)
+					self.bullets.append(bullet)
+					self.bulletcreated = True
 		elif self.direction == LEFT:
 			self.graphics['left_walk'].play()
 			self.graphics['left_walk'].blit(self.displaysurf, self.position)

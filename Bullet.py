@@ -6,7 +6,7 @@ RIGHT = 'right'
 NONE = 'none'
 
 # Speed of bullet
-BULLETSPEED = 15
+BULLETSPEED = 10
 
 class Bullet:
 	def __init__(self, displaysurf, imagesdict, direction, startx, starty):
