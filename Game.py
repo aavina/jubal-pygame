@@ -24,11 +24,12 @@ SPRT_RECT_Y=LEN_SPRT_Y
 # Load the sprite SHEET
 SHEET = pygame.image.load('jubal_64.png')
 
-# Global dictionary that contains all Surface objects
+# Global dictionary that contains all static images
 IMAGESDICT = {
     'j_normal': SHEET.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
     'j_rightface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
     'j_leftface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*3), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
+    'bullet': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*8), SPRT_RECT_Y*3, 2, 2))
 }
 
 # Define the different animation types
@@ -117,6 +118,9 @@ while True:
 
     # Draw player
     player.draw()
+
+    # Update player
+    player.update()
 
     pygame.display.update()
     fpsClock.tick(FPS)
