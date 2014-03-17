@@ -108,13 +108,15 @@ while True:
         player.moveRight()
     elif keyinput.wasKeyPressed(K_SPACE):
         player.shoot()
-    elif keyinput.wasKeyPressed(K_UP):
-        player.jump()
     elif keyinput.wasKeyPressed(K_ESCAPE):
         pygame.quit()
         sys.exit()
     else:
         player.stopMoving()
+
+    # Vertical logic
+    if keyinput.wasKeyPressed(K_UP):
+        player.jump()
 
     # Draw player
     player.draw()

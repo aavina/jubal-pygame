@@ -138,8 +138,9 @@ class Player:
 
 
 	def jump(self):
-		self.jumping = True
-		jumpClock = pygame.time.get_ticks()
+		if not self.jumping and not self.falling:
+			self.jumping = True
+			self.jumpClock = pygame.time.get_ticks()
 
 
 	def shoot(self):
