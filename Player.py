@@ -52,10 +52,10 @@ class Player:
 					bullet = Bullet(self.displaysurf, self.imagesdict, LEFT, startx, starty)
 					self.bullets.append(bullet)
 					self.bulletcreated = True
-		elif self.direction == LEFT:
+		elif self.direction == LEFT and not self.jumping and not self.falling:
 			self.graphics['left_walk'].play()
 			self.graphics['left_walk'].blit(self.displaysurf, self.position)
-		elif self.direction == RIGHT:
+		elif self.direction == RIGHT and not self.jumping and not self.falling:
 			self.graphics['right_walk'].play()
 			self.graphics['right_walk'].blit(self.displaysurf, self.position)
 
@@ -75,9 +75,9 @@ class Player:
 				self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)
 
 		# Idle
-		if self.direction == NONE and self.facingRight and not self.shooting:
+		if self.direction == NONE and self.facingRight and not self.shooting and not self.jumping and not self.falling:
 			self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
-		elif self.direction == NONE and not self.facingRight and not self.shooting:
+		elif self.direction == NONE and not self.facingRight and not self.shooting and not self.jumping and not self.falling:
 			self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)
 
 		# Draw bullets (if any)

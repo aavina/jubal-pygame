@@ -28,7 +28,7 @@ SHEET = pygame.image.load('jubal_64.png')
 IMAGESDICT = {
     'j_normal': SHEET.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
     'j_rightface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-    'j_leftface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*3), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
+    'j_leftface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*5), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
     'bullet': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*8), SPRT_RECT_Y*3, 2, 2))
 }
 
@@ -38,8 +38,8 @@ animTypes = 'right_walk left_walk shoot_right shoot_left jump_right jump_left ri
 # These tuples contain (base_x, base_y, numOfFrames)
 # numOfFrames is in the x-direction
 animTypesInfo = {
-    'right_walk':   (SPRT_RECT_X+LEN_SPRT_X, SPRT_RECT_Y, 2),
-    'left_walk':    (SPRT_RECT_X+(LEN_SPRT_X*4), SPRT_RECT_Y, 2),
+    'right_walk':   (SPRT_RECT_X+LEN_SPRT_X, SPRT_RECT_Y, 4),
+    'left_walk':    (SPRT_RECT_X+(LEN_SPRT_X*6), SPRT_RECT_Y, 4),
     'shoot_right':  (LEN_SPRT_X, 0, 4),
     'shoot_left':   (LEN_SPRT_X*5, 0, 4),
     'jump_right':   (0, LEN_SPRT_Y*2, 7),
