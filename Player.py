@@ -60,7 +60,7 @@ class Player:
 			self.graphics['right_walk'].blit(self.displaysurf, self.position)
 
         # Handle jumping
-		if self.jumping:
+		if self.jumping and not self.shooting:
 			dirstr = ''
 			if self.facingRight:
 				dirstr = 'jump_right'
@@ -68,7 +68,7 @@ class Player:
 				dirstr = 'jump_left'
 			self.graphics[dirstr].play()
 			self.graphics[dirstr].blit(self.displaysurf, self.position)
-		elif self.falling:
+		elif self.falling and not self.shooting:
 			if self.facingRight:
 				self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
 			else:
@@ -86,12 +86,12 @@ class Player:
 
 	def update(self):
 		# Check if moving horizontally
-		if self.direction == LEFT:
+		if self.direction == LEFT and not self.shooting:
 			mv_x = self.position[0] - kWalkSpeed
 			mv_y = self.position[1]
 			if(mv_x > 0):
 				self.position = (mv_x, mv_y)
-		elif self.direction == RIGHT:
+		elif self.direction == RIGHT and not self.shooting:
 			mv_x = self.position[0] + kWalkSpeed
 			mv_y = self.position[1]
 			if((mv_x + self.len_sprt_x) < self.screen_x):
