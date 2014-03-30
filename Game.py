@@ -2,6 +2,7 @@ import pygame, sys, time, pyganim
 from pygame.locals import *
 from Player import Player
 from Input import Input
+from Tile import Tile
 
 pygame.init()
 
@@ -29,7 +30,8 @@ IMAGESDICT = {
     'j_normal': SHEET.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
     'j_rightface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
     'j_leftface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*5), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-    'bullet': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*8), SPRT_RECT_Y*3, 2, 2))
+    'bullet': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*8), SPRT_RECT_Y*3, 2, 2)),
+    'ground': SHEET.subsurface(pygame.Rect(0, SPRT_RECT_Y*4, LEN_SPRT_X, LEN_SPRT_Y)),
 }
 
 # Define the different animation types
@@ -71,13 +73,14 @@ BLACK = (0,0,0)
 
 # Calculate starting position of player
 startX = SCREEN_X/2 - LEN_SPRT_X/2
-startY = SCREEN_Y - LEN_SPRT_Y
+startY = SCREEN_Y - (LEN_SPRT_Y*2)
 
 # Hold info on keys pressed, held, released
 keyinput = Input()
 
-# Initialize Player
+# Initialize Player and a tile
 player = Player(DISPLAYSURF, IMAGESDICT, LEN_SPRT_X, LEN_SPRT_Y, SCREEN_X, SCREEN_Y, animObjs, startX, startY)
+tile = Tile(DISPLAYSURF, IMAGESDICT, 0, SCREEN_Y-LEN_SPRT_Y)
 
 # Start game loop
 while True:
@@ -120,6 +123,7 @@ while True:
 
     # Draw player
     player.draw()
+    tile.draw()
 
     # Update player
     player.update()
