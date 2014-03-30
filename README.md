@@ -1,4 +1,4 @@
-# This is my README
+jubal-pygame
 
 Simple platformer to learn Pygame
 
