@@ -1,13 +1,14 @@
 import pygame, sys, time, pyganim
 from pygame.locals import *
 from Bullet import *
+from GameMap import *
 
-kWalkSpeed = 4
+kWalkSpeed = 3
 kJumpSpeed = 4
 kJumpClockDelay = 200
 
 class Player:
-	def __init__(self, displaysurf, imagesdict, len_sprt_x, len_sprt_y, scn_x, scn_y, graphics, x, y):
+	def __init__(self, displaysurf, imagesdict, len_sprt_x, len_sprt_y, scn_x, scn_y, graphics, x, y, gamemap):
 		self.displaysurf = displaysurf
 		self.imagesdict = imagesdict
 		self.len_sprt_x = len_sprt_x
@@ -23,7 +24,7 @@ class Player:
 		self.bulletcreated = False
 		self.jumpClock = 0
 		self.direction = NONE
-		self.bullets = []
+		self.gamemap = gamemap
 
 
 	def draw(self):
@@ -37,8 +38,8 @@ class Player:
 				if self.graphics['shoot_right']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
 					startx = self.position[0] + self.len_sprt_x
 					starty = self.position[1] + 22
-					bullet = Bullet(self.displaysurf, self.imagesdict, RIGHT, startx, starty)
-					self.bullets.append(bullet)
+					bullet = Bullet(self.displaysurf, self.imagesdict['bullet'], RIGHT, startx, starty)
+					self.gamemap.addSprite(bullet)
 					self.bulletcreated = True
 		elif self.shooting and not self.facingRight:
 			if self.graphics['shoot_left'].isFinished():
@@ -49,8 +50,8 @@ class Player:
 				if self.graphics['shoot_left']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
 					startx = self.position[0]
 					starty = self.position[1] + 22
-					bullet = Bullet(self.displaysurf, self.imagesdict, LEFT, startx, starty)
-					self.bullets.append(bullet)
+					bullet = Bullet(self.displaysurf, self.imagesdict['bullet'], LEFT, startx, starty)
+					self.gamemap.addSprite(bullet)
 					self.bulletcreated = True
 		elif self.direction == LEFT and not self.jumping and not self.falling:
 			self.graphics['left_walk'].play()
@@ -78,11 +79,8 @@ class Player:
 		if self.direction == NONE and self.facingRight and not self.shooting and not self.jumping and not self.falling:
 			self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
 		elif self.direction == NONE and not self.facingRight and not self.shooting and not self.jumping and not self.falling:
-			self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)
+			self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)			
 
-		# Draw bullets (if any)
-		for bullet in self.bullets:
-			bullet.draw()
 
 	def update(self):
 		# Check if moving horizontally
@@ -110,18 +108,11 @@ class Player:
 		elif self.falling:
 			mv_x = self.position[0]
 			mv_y = self.position[1] + kJumpSpeed
-			if mv_y + self.len_sprt_y < self.screen_y:
+			if mv_y + (self.len_sprt_y*2) < self.screen_y:
 				self.position = (mv_x, mv_y)
 			else:
 				self.falling = False
 
-		# Update bullets
-		for bullet in self.bullets:
-			bulletx = bullet.position[0]
-			if bulletx > self.screen_x or bulletx < 0:
-				self.bullets.remove(bullet)
-			else:
-				bullet.update()
 
 	def moveLeft(self):
 		self.direction = LEFT

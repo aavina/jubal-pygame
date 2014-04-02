@@ -1,3 +1,5 @@
+from Sprite import *
+
 # Directions to move
 UP = 'up'
 DOWN = 'down'
@@ -8,16 +10,16 @@ NONE = 'none'
 # Speed of bullet
 BULLETSPEED = 10
 
-class Bullet:
-	def __init__(self, displaysurf, imagesdict, direction, startx, starty):
+class Bullet(Sprite):
+	def __init__(self, displaysurf, surface, direction, startx, starty):
 		self.displaysurf = displaysurf
-		self.imagesdict = imagesdict
-		self.direction = direction
+		self.surface = surface
 		self.position = (startx, starty)
-
+		self.direction = direction
+		self._updateable = True
 
 	def draw(self):
-		self.displaysurf.blit(self.imagesdict['bullet'],self.position)
+		self.displaysurf.blit(self.surface, self.position)
 
 
 	def update(self):

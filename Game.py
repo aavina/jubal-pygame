@@ -2,7 +2,8 @@ import pygame, sys, time, pyganim
 from pygame.locals import *
 from Player import Player
 from Input import Input
-from Tile import Tile
+from GameMap import GameMap
+from Sprite import Sprite
 
 pygame.init()
 
@@ -78,9 +79,14 @@ startY = SCREEN_Y - (LEN_SPRT_Y*2)
 # Hold info on keys pressed, held, released
 keyinput = Input()
 
-# Initialize Player and a tile
-player = Player(DISPLAYSURF, IMAGESDICT, LEN_SPRT_X, LEN_SPRT_Y, SCREEN_X, SCREEN_Y, animObjs, startX, startY)
-tile = Tile(DISPLAYSURF, IMAGESDICT, 0, SCREEN_Y-LEN_SPRT_Y)
+# Initialize gamemap and Player
+gamemap = GameMap(DISPLAYSURF, IMAGESDICT, SCREEN_X, SCREEN_Y)
+player = Player(DISPLAYSURF, IMAGESDICT, LEN_SPRT_X, LEN_SPRT_Y, SCREEN_X, SCREEN_Y, animObjs, startX, startY, gamemap)
+
+# Add floor tiles
+for x in range(0, SCREEN_X/LEN_SPRT_X):
+    tile = Sprite(DISPLAYSURF, IMAGESDICT['ground'], LEN_SPRT_X*x, SCREEN_Y-LEN_SPRT_Y, False)
+    gamemap.addSprite(tile)
 
 # Start game loop
 while True:
@@ -110,7 +116,9 @@ while True:
     elif keyinput.isKeyHeld(K_RIGHT):
         player.moveRight()
     elif keyinput.wasKeyPressed(K_SPACE):
+        # Play player shooting animation
         player.shoot()
+
     elif keyinput.wasKeyPressed(K_ESCAPE):
         pygame.quit()
         sys.exit()
@@ -121,12 +129,13 @@ while True:
     if keyinput.wasKeyPressed(K_UP):
         player.jump()
 
-    # Draw player
+    # Draw
     player.draw()
-    tile.draw()
+    gamemap.draw()
 
-    # Update player
+    # Update
     player.update()
+    gamemap.update()
 
     pygame.display.update()
     fpsClock.tick(FPS)
