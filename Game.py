@@ -1,9 +1,11 @@
-import pygame, sys, time, pyganim
+import pygame, sys, pyganim
 from pygame.locals import *
 from Player import Player
 from Input import Input
 from GameMap import GameMap
 from Sprite import Sprite
+import os
+from os.path import dirname
 
 pygame.init()
 
@@ -24,7 +26,7 @@ SPRT_RECT_X=0
 SPRT_RECT_Y=LEN_SPRT_Y
 
 # Load the sprite SHEET
-SHEET = pygame.image.load('jubal_64.png')
+SHEET = pygame.image.load('assets\jubal_64.png')
 
 # Global dictionary that contains all static images
 IMAGESDICT = {
