@@ -108,7 +108,7 @@ class Player:
 		elif self.falling:
 			mv_x = self.position[0]
 			mv_y = self.position[1] + kJumpSpeed
-			if mv_y + (self.len_sprt_y*2) < self.screen_y:
+			if mv_y + (self.len_sprt_y*2) <= self.screen_y:
 				self.position = (mv_x, mv_y)
 			else:
 				self.falling = False
