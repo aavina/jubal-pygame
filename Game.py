@@ -75,20 +75,23 @@ SHEET.set_clip(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)) #f
 BLACK = (0,0,0)
 
 # Calculate starting position of player
-startX = SCREEN_X/2 - LEN_SPRT_X/2
-startY = SCREEN_Y - (LEN_SPRT_Y*2)
+startX = SCREEN_X - LEN_SPRT_X
+startY = SCREEN_Y - LEN_SPRT_Y
 
 # Hold info on keys pressed, held, released
 keyinput = Input()
 
 # Initialize gamemap and Player
-gamemap = GameMap(DISPLAYSURF, IMAGESDICT, SCREEN_X, SCREEN_Y)
-player = Player(DISPLAYSURF, IMAGESDICT, LEN_SPRT_X, LEN_SPRT_Y, SCREEN_X, SCREEN_Y, animObjs, startX, startY, gamemap)
+#gamemap = GameMap(DISPLAYSURF, IMAGESDICT, SCREEN_X, SCREEN_Y)
+player = Player(IMAGESDICT, animObjs)
+player.rect.topleft = startX, startY
+# Groups
+allsprites = pygame.sprite.RenderPlain(player)
 
 # Add floor tiles
-for x in range(0, SCREEN_X/LEN_SPRT_X):
-    tile = Sprite(DISPLAYSURF, IMAGESDICT['ground'], LEN_SPRT_X*x, SCREEN_Y-LEN_SPRT_Y, False)
-    gamemap.addSprite(tile)
+#for x in range(0, SCREEN_X/LEN_SPRT_X):
+#    tile = Sprite(DISPLAYSURF, IMAGESDICT['ground'], LEN_SPRT_X*x, SCREEN_Y-LEN_SPRT_Y, False)
+#    gamemap.addSprite(tile)
 
 # Start game loop
 while True:
@@ -131,13 +134,12 @@ while True:
     if keyinput.wasKeyPressed(K_UP):
         player.jump()
 
-    # Draw
-    player.draw()
-    gamemap.draw()
-
     # Update
-    player.update()
-    gamemap.update()
+    allsprites.update()
+    #gamemap.update()
 
+    # Draw
+    allsprites.draw(DISPLAYSURF)
+    #gamemap.draw()
     pygame.display.update()
     fpsClock.tick(FPS)

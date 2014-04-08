@@ -7,16 +7,12 @@ kWalkSpeed = 3
 kJumpSpeed = 4
 kJumpClockDelay = 200
 
-class Player:
-	def __init__(self, displaysurf, imagesdict, len_sprt_x, len_sprt_y, scn_x, scn_y, graphics, x, y, gamemap):
-		self.displaysurf = displaysurf
+class Player(pygame.sprite.Sprite):
+	def __init__(self, imagesdict,graphics):
+		pygame.sprite.Sprite.__init__(self)
 		self.imagesdict = imagesdict
-		self.len_sprt_x = len_sprt_x
-		self.len_sprt_y = len_sprt_y
-		self.screen_x = scn_x
-		self.screen_y = scn_y
 		self.graphics = graphics
-		self.position = (x, y)
+
 		self.facingRight = True
 		self.jumping = False
 		self.falling = False
@@ -24,9 +20,11 @@ class Player:
 		self.bulletcreated = False
 		self.jumpClock = 0
 		self.direction = NONE
-		self.gamemap = gamemap
 
+		self.image = self.imagesdict['j_rightface']
+		self.rect = self.image.get_rect()
 
+	'''
 	def draw(self):
 		if self.shooting and self.facingRight:
 			if self.graphics['shoot_right'].isFinished():
@@ -39,7 +37,6 @@ class Player:
 					startx = self.position[0] + self.len_sprt_x
 					starty = self.position[1] + 22
 					bullet = Bullet(self.displaysurf, self.imagesdict['bullet'], RIGHT, startx, starty)
-					self.gamemap.addSprite(bullet)
 					self.bulletcreated = True
 		elif self.shooting and not self.facingRight:
 			if self.graphics['shoot_left'].isFinished():
@@ -51,7 +48,6 @@ class Player:
 					startx = self.position[0]
 					starty = self.position[1] + 22
 					bullet = Bullet(self.displaysurf, self.imagesdict['bullet'], LEFT, startx, starty)
-					self.gamemap.addSprite(bullet)
 					self.bulletcreated = True
 		elif self.direction == LEFT and not self.jumping and not self.falling:
 			self.graphics['left_walk'].play()
@@ -59,7 +55,6 @@ class Player:
 		elif self.direction == RIGHT and not self.jumping and not self.falling:
 			self.graphics['right_walk'].play()
 			self.graphics['right_walk'].blit(self.displaysurf, self.position)
-
         # Handle jumping
 		if self.jumping and not self.shooting:
 			dirstr = ''
@@ -80,38 +75,41 @@ class Player:
 			self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
 		elif self.direction == NONE and not self.facingRight and not self.shooting and not self.jumping and not self.falling:
 			self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)			
-
+		'''
 
 	def update(self):
 		# Check if moving horizontally
 		if self.direction == LEFT and not self.shooting:
-			mv_x = self.position[0] - kWalkSpeed
-			mv_y = self.position[1]
-			if(mv_x > 0):
-				self.position = (mv_x, mv_y)
+			self.graphics['left_walk'].play()
+			self.image = self.graphics['left_walk'].getCurrentFrame()
+			newpos = self.rect.move((-kWalkSpeed,0))
+			self.rect = newpos
 		elif self.direction == RIGHT and not self.shooting:
-			mv_x = self.position[0] + kWalkSpeed
-			mv_y = self.position[1]
-			if((mv_x + self.len_sprt_x) < self.screen_x):
-				self.position = (mv_x, mv_y)
+			self.graphics['right_walk'].play()
+			self.image = self.graphics['right_walk'].getCurrentFrame()
+			newpos = self.rect.move((kWalkSpeed,0))
+			self.rect = newpos
 
 		# Check if moving vertically
 		if self.jumping:
-			mv_x = self.position[0]
-			mv_y = self.position[1] - kJumpSpeed
-			if mv_y > 0:
-				self.position = (mv_x, mv_y)
+			newpos = self.rect.move((0,-kJumpSpeed))
+			self.rect = newpos
 			if(pygame.time.get_ticks() - (self.jumpClock+kJumpClockDelay)) > 0:
 				self.jumpClock = 0
 				self.jumping = False
 				self.falling = True
 		elif self.falling:
-			mv_x = self.position[0]
-			mv_y = self.position[1] + kJumpSpeed
-			if mv_y + (self.len_sprt_y*2) <= self.screen_y:
-				self.position = (mv_x, mv_y)
+			newpos = self.rect.move((0, kJumpSpeed))
+			if self.rect[1] + kJumpSpeed + 64 <= 400:
+				self.rect = newpos
 			else:
 				self.falling = False
+
+		# Idle
+		if self.direction == NONE and self.facingRight and not self.shooting and not self.jumping and not self.falling:
+			self.image = self.imagesdict['j_rightface']
+		elif self.direction == NONE and not self.facingRight and not self.shooting and not self.jumping and not self.falling:
+			self.image = self.imagesdict['j_leftface']		
 
 
 	def moveLeft(self):
