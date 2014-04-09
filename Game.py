@@ -2,8 +2,6 @@ import pygame, sys, pyganim
 from pygame.locals import *
 from Player import Player
 from Input import Input
-from GameMap import GameMap
-from Sprite import Sprite
 import os
 from os.path import dirname
 
@@ -82,10 +80,10 @@ startY = SCREEN_Y - LEN_SPRT_Y
 keyinput = Input()
 
 # Initialize gamemap and Player
-#gamemap = GameMap(DISPLAYSURF, IMAGESDICT, SCREEN_X, SCREEN_Y)
 player = Player(IMAGESDICT, animObjs)
 player.rect.topleft = startX, startY
-# Groups
+
+# Sprite Groups
 allsprites = pygame.sprite.RenderPlain(player)
 
 # Add floor tiles
@@ -123,11 +121,10 @@ while True:
     elif keyinput.wasKeyPressed(K_SPACE):
         # Play player shooting animation
         player.shoot()
-
     elif keyinput.wasKeyPressed(K_ESCAPE):
         pygame.quit()
         sys.exit()
-    else:
+    elif not player.shooting:
         player.stopMoving()
 
     # Vertical logic
@@ -136,10 +133,9 @@ while True:
 
     # Update
     allsprites.update()
-    #gamemap.update()
 
     # Draw
     allsprites.draw(DISPLAYSURF)
-    #gamemap.draw()
+
     pygame.display.update()
     fpsClock.tick(FPS)
