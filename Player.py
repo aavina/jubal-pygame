@@ -4,7 +4,7 @@ from Bullet import *
 
 kWalkSpeed = 3
 kJumpSpeed = 4
-kJumpClockDelay = 200
+kJumpClockDelay = 400
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self, imagesdict,graphics):
@@ -69,14 +69,15 @@ class Player(pygame.sprite.Sprite):
 
 		# Check if moving vertically
 		if self.jumping:
-			# Change to jumping sprite
-			dirstr = ''
-			if self.facingRight:
-				dirstr = 'jump_right'
-			else:
-				dirstr = 'jump_left'
-			self.graphics[dirstr].play()
-			self.image = self.graphics[dirstr].getCurrentFrame()
+			# Change to jumping sprite if not shooting
+			if not self.shooting:
+				dirstr = ''
+				if self.facingRight:
+					dirstr = 'jump_right'
+				else:
+					dirstr = 'jump_left'
+				self.graphics[dirstr].play()
+				self.image = self.graphics[dirstr].getCurrentFrame()
 			# Move the sprite
 			newpos = self.rect.move((0,-kJumpSpeed))
 			self.rect = newpos
@@ -86,12 +87,13 @@ class Player(pygame.sprite.Sprite):
 				self.jumping = False
 				self.falling = True
 		elif self.falling:
-			# Change to facing sprite
-			if self.facingRight:
-				dirstr = 'j_rightface'
-			else:
-				dirstr = 'j_leftface'
-			self.image = self.imagesdict[dirstr]
+			# Change to facing sprite if not shooting
+			if not self.shooting:
+				if self.facingRight:
+					dirstr = 'j_rightface'
+				else:
+					dirstr = 'j_leftface'
+				self.image = self.imagesdict[dirstr]
 			newpos = self.rect.move((0, kJumpSpeed))
 			# Let sprite fall until bounds are met
 			if self.rect[1] + kJumpSpeed + 64 <= 400:

@@ -1,9 +1,9 @@
+#!/usr/bin/env python
+
 import pygame, sys, pyganim
 from pygame.locals import *
 from Player import Player
 from Input import Input
-import os
-from os.path import dirname
 
 pygame.init()
 
