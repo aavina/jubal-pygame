@@ -1,22 +1,17 @@
 import pygame, sys, time, pyganim
 from pygame.locals import *
 from Bullet import *
-from GameMap import *
 
 kWalkSpeed = 3
 kJumpSpeed = 4
-kJumpClockDelay = 200
+kJumpClockDelay = 400
 
-class Player:
-	def __init__(self, displaysurf, imagesdict, len_sprt_x, len_sprt_y, scn_x, scn_y, graphics, x, y, gamemap):
-		self.displaysurf = displaysurf
+class Player(pygame.sprite.Sprite):
+	def __init__(self, imagesdict,graphics):
+		pygame.sprite.Sprite.__init__(self)
 		self.imagesdict = imagesdict
-		self.len_sprt_x = len_sprt_x
-		self.len_sprt_y = len_sprt_y
-		self.screen_x = scn_x
-		self.screen_y = scn_y
 		self.graphics = graphics
-		self.position = (x, y)
+
 		self.facingRight = True
 		self.jumping = False
 		self.falling = False
@@ -24,94 +19,93 @@ class Player:
 		self.bulletcreated = False
 		self.jumpClock = 0
 		self.direction = NONE
-		self.gamemap = gamemap
 
-
-	def draw(self):
-		if self.shooting and self.facingRight:
-			if self.graphics['shoot_right'].isFinished():
-				self.shooting = self.bulletcreated = False
-				self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
-			else:
-				self.graphics['shoot_right'].blit(self.displaysurf,self.position)
-				# Create bullet after gun explosion
-				if self.graphics['shoot_right']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
-					startx = self.position[0] + self.len_sprt_x
-					starty = self.position[1] + 22
-					bullet = Bullet(self.displaysurf, self.imagesdict['bullet'], RIGHT, startx, starty)
-					self.gamemap.addSprite(bullet)
-					self.bulletcreated = True
-		elif self.shooting and not self.facingRight:
-			if self.graphics['shoot_left'].isFinished():
-				self.shooting = self.bulletcreated = False
-				self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)
-			else:
-				self.graphics['shoot_left'].blit(self.displaysurf,self.position)
-				if self.graphics['shoot_left']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
-					startx = self.position[0]
-					starty = self.position[1] + 22
-					bullet = Bullet(self.displaysurf, self.imagesdict['bullet'], LEFT, startx, starty)
-					self.gamemap.addSprite(bullet)
-					self.bulletcreated = True
-		elif self.direction == LEFT and not self.jumping and not self.falling:
-			self.graphics['left_walk'].play()
-			self.graphics['left_walk'].blit(self.displaysurf, self.position)
-		elif self.direction == RIGHT and not self.jumping and not self.falling:
-			self.graphics['right_walk'].play()
-			self.graphics['right_walk'].blit(self.displaysurf, self.position)
-
-        # Handle jumping
-		if self.jumping and not self.shooting:
-			dirstr = ''
-			if self.facingRight:
-				dirstr = 'jump_right'
-			else:
-				dirstr = 'jump_left'
-			self.graphics[dirstr].play()
-			self.graphics[dirstr].blit(self.displaysurf, self.position)
-		elif self.falling and not self.shooting:
-			if self.facingRight:
-				self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
-			else:
-				self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)
-
-		# Idle
-		if self.direction == NONE and self.facingRight and not self.shooting and not self.jumping and not self.falling:
-			self.displaysurf.blit(self.imagesdict['j_rightface'],self.position)
-		elif self.direction == NONE and not self.facingRight and not self.shooting and not self.jumping and not self.falling:
-			self.displaysurf.blit(self.imagesdict['j_leftface'],self.position)			
-
+		self.image = self.imagesdict['j_rightface']
+		self.rect = self.image.get_rect()
+		
 
 	def update(self):
-		# Check if moving horizontally
-		if self.direction == LEFT and not self.shooting:
-			mv_x = self.position[0] - kWalkSpeed
-			mv_y = self.position[1]
-			if(mv_x > 0):
-				self.position = (mv_x, mv_y)
-		elif self.direction == RIGHT and not self.shooting:
-			mv_x = self.position[0] + kWalkSpeed
-			mv_y = self.position[1]
-			if((mv_x + self.len_sprt_x) < self.screen_x):
-				self.position = (mv_x, mv_y)
+		# Check if moving horizontally or shooting
+		if self.shooting and self.direction == LEFT:
+			if self.graphics['shoot_left'].isFinished():
+				self.shooting = False
+				self.bulletcreated = False
+				self.image = self.imagesdict['j_leftface']
+			else:
+				self.graphics['shoot_left'].play()
+				self.image = self.graphics['shoot_left'].getCurrentFrame()
+		        if self.graphics['shoot_left']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
+		            startx = self.rect[0]
+		            starty = self.rect[1] + 22
+		            bullet = Bullet(LEFT, self.imagesdict['bullet'])
+		            bullet.rect.topleft = startx, starty
+		            (self.groups())[0].add(bullet)
+		            self.bulletcreated = True
+		elif self.shooting and self.direction == RIGHT:
+			if self.graphics['shoot_right'].isFinished():
+				self.shooting = False
+				self.bulletcreated = False
+				self.image = self.imagesdict['j_rightface']
+			else:
+				self.graphics['shoot_right'].play()
+				self.image = self.graphics['shoot_right'].getCurrentFrame()
+		        if self.graphics['shoot_right']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
+		            startx = self.rect[0] + 64
+		            starty = self.rect[1] + 22
+		            bullet = Bullet(RIGHT, self.imagesdict['bullet'])
+		            bullet.rect.topleft = startx, starty
+		            (self.groups())[0].add(bullet)
+		            self.bulletcreated = True
+		elif self.direction == LEFT:
+			self.graphics['left_walk'].play()
+			self.image = self.graphics['left_walk'].getCurrentFrame()
+			newpos = self.rect.move((-kWalkSpeed,0))
+			self.rect = newpos
+		elif self.direction == RIGHT:
+			self.graphics['right_walk'].play()
+			self.image = self.graphics['right_walk'].getCurrentFrame()
+			newpos = self.rect.move((kWalkSpeed,0))
+			self.rect = newpos
 
 		# Check if moving vertically
 		if self.jumping:
-			mv_x = self.position[0]
-			mv_y = self.position[1] - kJumpSpeed
-			if mv_y > 0:
-				self.position = (mv_x, mv_y)
+			# Change to jumping sprite if not shooting
+			if not self.shooting:
+				dirstr = ''
+				if self.facingRight:
+					dirstr = 'jump_right'
+				else:
+					dirstr = 'jump_left'
+				self.graphics[dirstr].play()
+				self.image = self.graphics[dirstr].getCurrentFrame()
+			# Move the sprite
+			newpos = self.rect.move((0,-kJumpSpeed))
+			self.rect = newpos
+			# Check if we've reached end of jump timer
 			if(pygame.time.get_ticks() - (self.jumpClock+kJumpClockDelay)) > 0:
 				self.jumpClock = 0
 				self.jumping = False
 				self.falling = True
 		elif self.falling:
-			mv_x = self.position[0]
-			mv_y = self.position[1] + kJumpSpeed
-			if mv_y + (self.len_sprt_y*2) <= self.screen_y:
-				self.position = (mv_x, mv_y)
+			# Change to facing sprite if not shooting
+			if not self.shooting:
+				if self.facingRight:
+					dirstr = 'j_rightface'
+				else:
+					dirstr = 'j_leftface'
+				self.image = self.imagesdict[dirstr]
+			newpos = self.rect.move((0, kJumpSpeed))
+			# Let sprite fall until bounds are met
+			if self.rect[1] + kJumpSpeed + 64 <= 400:
+				self.rect = newpos
 			else:
 				self.falling = False
+
+		# Idle
+		if self.direction == NONE and self.facingRight and not self.shooting and not self.jumping and not self.falling:
+			self.image = self.imagesdict['j_rightface']
+		elif self.direction == NONE and not self.facingRight and not self.shooting and not self.jumping and not self.falling:
+			self.image = self.imagesdict['j_leftface']		
 
 
 	def moveLeft(self):
@@ -139,7 +133,9 @@ class Player:
 			self.shooting = True
 			if self.facingRight:
 				self.graphics['shoot_right'].play()
+				self.image = self.graphics['shoot_right'].getCurrentFrame()
 				self.direction = RIGHT
 			else:
 				self.graphics['shoot_left'].play()
+				self.image = self.graphics['shoot_left'].getCurrentFrame()
 				self.direction = LEFT

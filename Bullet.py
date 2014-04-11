@@ -1,4 +1,4 @@
-from Sprite import *
+import pygame
 
 # Directions to move
 UP = 'up'
@@ -10,24 +10,18 @@ NONE = 'none'
 # Speed of bullet
 BULLETSPEED = 10
 
-class Bullet(Sprite):
-	def __init__(self, displaysurf, surface, direction, startx, starty):
-		self.displaysurf = displaysurf
-		self.surface = surface
-		self.position = (startx, starty)
+class Bullet(pygame.sprite.Sprite):
+	def __init__(self, direction, image):
+		pygame.sprite.Sprite.__init__(self)
 		self.direction = direction
-		self._updateable = True
-
-	def draw(self):
-		self.displaysurf.blit(self.surface, self.position)
+		self.image = image
+		self.rect = self.image.get_rect()
 
 
 	def update(self):
 		if self.direction == RIGHT:
-			new_x = self.position[0] + BULLETSPEED
-			new_y = self.position[1]
+			newpos = self.rect.move(BULLETSPEED,0)
+			self.rect = newpos
 		else:
-			new_x = self.position[0] - BULLETSPEED
-			new_y = self.position[1]
-
-		self.position = (new_x, new_y)
+			newpos = self.rect.move(-BULLETSPEED,0)
+			self.rect = newpos
