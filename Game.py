@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import pygame, sys, pyganim
+import pygame, sys, pyganim, os
 from pygame.locals import *
 from Player import Player
 from Input import Input
@@ -20,7 +20,7 @@ LEN_SPRT_X=64
 LEN_SPRT_Y=64
 
 # This is where the sprite is found on the sheet
-SPRT_RECT_X=0  
+SPRT_RECT_X=0
 SPRT_RECT_Y=LEN_SPRT_Y
 
 
@@ -106,8 +106,14 @@ def main():
 
 
 def LoadSpriteAssets():
+    # Find out if in Windows or Unix/Linux
+    if os.path.isfile('assets\\jubal_64.png'):
+        SHEET = pygame.image.load('assets\\jubal_64.png')
+    elif os.path.isfile('assets//jubal_64.png'):
+        SHEET = pygame.image.load('assets//jubal_64.png')
+
     # Load the sprite SHEET
-    SHEET = pygame.image.load('assets\jubal_64.png')
+    SHEET = pygame.image.load('assets//jubal_64.png')
     # Global dictionary that contains all static images
     IMAGESDICT = {
         'j_normal': SHEET.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
