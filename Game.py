@@ -4,6 +4,7 @@ import pygame, sys, pyganim, os
 from pygame.locals import *
 from Player import Player
 from Input import Input
+from Tile import Tile
 
 pygame.init()
 
@@ -46,13 +47,16 @@ def main():
     player = Player(IMAGESDICT, animObjs)
     player.rect.topleft = startX, startY
 
+    # Add tiles
+    startx = 0
+    starty = SCREEN_Y - LEN_SPRT_Y
+    tile = Tile(IMAGESDICT['ground'])
+    tile.rect.topleft = startx, starty
+
     # Sprite Groups
     allsprites = pygame.sprite.RenderPlain(player)
+    environment = pygame.sprite.RenderPlain(tile)
 
-    # Add floor tiles
-    #for x in range(0, SCREEN_X/LEN_SPRT_X):
-    #    tile = Sprite(DISPLAYSURF, IMAGESDICT['ground'], LEN_SPRT_X*x, SCREEN_Y-LEN_SPRT_Y, False)
-    #    gamemap.addSprite(tile)
 
     # Start game loop
     while True:
@@ -94,11 +98,16 @@ def main():
         if keyinput.wasKeyPressed(K_UP):
             player.jump()
 
+        # Check for collisions between player and environment
+        collision_list = pygame.sprite.spritecollide(player, environment, False)
+
         # Update
         allsprites.update()
+        environment.update()
 
         # Draw
         allsprites.draw(DISPLAYSURF)
+        environment.draw(DISPLAYSURF)
 
         pygame.display.update()
         fpsClock.tick(FPS)
@@ -118,7 +127,7 @@ def LoadSpriteAssets():
         'j_rightface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
         'j_leftface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*5), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
         'bullet': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*8), SPRT_RECT_Y*3, 2, 2)),
-        'ground': SHEET.subsurface(pygame.Rect(0, SPRT_RECT_Y*4, LEN_SPRT_X, LEN_SPRT_Y)),
+        'ground': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*4, SPRT_RECT_Y*5, LEN_SPRT_X, LEN_SPRT_Y)),
     }
 
     # Define the different animation types
