@@ -106,14 +106,12 @@ def main():
 
 
 def LoadSpriteAssets():
-    # Find out if in Windows or Unix/Linux
+    # Find out if in Windows or Unix/Linux then load SpriteSheet
     if os.path.isfile('assets\\jubal_64.png'):
         SHEET = pygame.image.load('assets\\jubal_64.png')
     elif os.path.isfile('assets//jubal_64.png'):
         SHEET = pygame.image.load('assets//jubal_64.png')
 
-    # Load the sprite SHEET
-    SHEET = pygame.image.load('assets//jubal_64.png')
     # Global dictionary that contains all static images
     IMAGESDICT = {
         'j_normal': SHEET.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
