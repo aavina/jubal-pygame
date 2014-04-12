@@ -27,8 +27,11 @@ SPRT_RECT_Y=LEN_SPRT_Y
 
 def main():
 
+    # Determine assets
+    sprite_asset, bullet_sound_asset = DetermineAssets()
+
     # Load sprite assets
-    IMAGESDICT, animObjs = LoadSpriteAssets()
+    IMAGESDICT, animObjs = LoadSpriteAssets(sprite_asset)
 
     # Main game surface
     DISPLAYSURF = pygame.display.set_mode((SCREEN_X, SCREEN_Y)) #Make the screen
@@ -44,19 +47,18 @@ def main():
     keyinput = Input()
 
     # Initialize gamemap and Player
-    player = Player(IMAGESDICT, animObjs)
+    player = Player(IMAGESDICT, animObjs, bullet_sound_asset)
     player.rect.topleft = startX, startY
 
     # Add tiles
     startx = 0
-    starty = SCREEN_Y - LEN_SPRT_Y
+    starty = SCREEN_Y - LEN_SPRT_Y/2
     tile = Tile(IMAGESDICT['ground'])
     tile.rect.topleft = startx, starty
 
     # Sprite Groups
     allsprites = pygame.sprite.RenderPlain(player)
     environment = pygame.sprite.RenderPlain(tile)
-
 
     # Start game loop
     while True:
@@ -113,21 +115,28 @@ def main():
         fpsClock.tick(FPS)
 
 
-
-def LoadSpriteAssets():
+# Determines what filesystem accessor to use and retreives graphic and sound assets
+def DetermineAssets():
     # Find out if in Windows or Unix/Linux then load SpriteSheet
     if os.path.isfile('assets\\jubal_64.png'):
         SHEET = pygame.image.load('assets\\jubal_64.png')
+        bullet_sound = pygame.mixer.Sound("assets\\bullet.wav")
     elif os.path.isfile('assets//jubal_64.png'):
         SHEET = pygame.image.load('assets//jubal_64.png')
+        bullet_sound = pygame.mixer.Sound("assets//bullet.wav")
 
+    return SHEET, bullet_sound
+
+
+
+def LoadSpriteAssets(SHEET):
     # Global dictionary that contains all static images
     IMAGESDICT = {
         'j_normal': SHEET.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
         'j_rightface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
         'j_leftface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*5), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
         'bullet': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*8), SPRT_RECT_Y*3, 2, 2)),
-        'ground': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*4, SPRT_RECT_Y*5, LEN_SPRT_X, LEN_SPRT_Y)),
+        'ground': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*4, SPRT_RECT_Y*5, LEN_SPRT_X, LEN_SPRT_Y/2)),
     }
 
     # Define the different animation types

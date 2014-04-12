@@ -7,10 +7,11 @@ kJumpSpeed = 4
 kJumpClockDelay = 400
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, imagesdict,graphics):
+	def __init__(self, imagesdict, graphics, bullet_sound):
 		pygame.sprite.Sprite.__init__(self)
 		self.imagesdict = imagesdict
 		self.graphics = graphics
+		self.bullet_sound = bullet_sound
 
 		self.facingRight = True
 		self.jumping = False
@@ -130,7 +131,10 @@ class Player(pygame.sprite.Sprite):
 
 	def shoot(self):
 		if not self.shooting:
+			# Play bullet sound
+			self.bullet_sound.play()
 			self.shooting = True
+			# Set and start sprite animation
 			if self.facingRight:
 				self.graphics['shoot_right'].play()
 				self.image = self.graphics['shoot_right'].getCurrentFrame()
