@@ -4,7 +4,7 @@ from Bullet import *
 
 kWalkSpeed = 3
 kJumpSpeed = 4
-kJumpClockDelay = 400
+kJumpClockDelay = 500
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self, imagesdict,graphics):
@@ -19,10 +19,14 @@ class Player(pygame.sprite.Sprite):
 		self.bulletcreated = False
 		self.jumpClock = 0
 		self.direction = NONE
+		self.collidingLeft = False
+		self.collidingRight = False
+		self.collidingUp = False
+		self.collidingDown = False
 
 		self.image = self.imagesdict['j_rightface']
 		self.rect = self.image.get_rect()
-		
+
 
 	def update(self):
 		# Check if moving horizontally or shooting
@@ -56,19 +60,19 @@ class Player(pygame.sprite.Sprite):
 		            bullet.rect.topleft = startx, starty
 		            (self.groups())[0].add(bullet)
 		            self.bulletcreated = True
-		elif self.direction == LEFT:
+		elif self.direction == LEFT and not self.collidingLeft:
 			self.graphics['left_walk'].play()
 			self.image = self.graphics['left_walk'].getCurrentFrame()
 			newpos = self.rect.move((-kWalkSpeed,0))
 			self.rect = newpos
-		elif self.direction == RIGHT:
+		elif self.direction == RIGHT and not self.collidingRight:
 			self.graphics['right_walk'].play()
 			self.image = self.graphics['right_walk'].getCurrentFrame()
 			newpos = self.rect.move((kWalkSpeed,0))
 			self.rect = newpos
 
 		# Check if moving vertically
-		if self.jumping:
+		if self.jumping and not self.collidingUp:
 			# Change to jumping sprite if not shooting
 			if not self.shooting:
 				dirstr = ''
@@ -86,7 +90,7 @@ class Player(pygame.sprite.Sprite):
 				self.jumpClock = 0
 				self.jumping = False
 				self.falling = True
-		elif self.falling:
+		elif self.falling and not self.collidingDown:
 			# Change to facing sprite if not shooting
 			if not self.shooting:
 				if self.facingRight:
@@ -105,7 +109,11 @@ class Player(pygame.sprite.Sprite):
 		if self.direction == NONE and self.facingRight and not self.shooting and not self.jumping and not self.falling:
 			self.image = self.imagesdict['j_rightface']
 		elif self.direction == NONE and not self.facingRight and not self.shooting and not self.jumping and not self.falling:
-			self.image = self.imagesdict['j_leftface']		
+			self.image = self.imagesdict['j_leftface']
+
+		# Reset collision variables
+		self.collidingRight = self.collidingLeft \
+			= self.collidingUp = self.collidingDown = False
 
 
 	def moveLeft(self):
@@ -139,3 +147,21 @@ class Player(pygame.sprite.Sprite):
 				self.graphics['shoot_left'].play()
 				self.image = self.graphics['shoot_left'].getCurrentFrame()
 				self.direction = LEFT
+
+
+	def determineCollisionDir(self, collision_list):
+		for tile in collision_list:
+			if tile.rect.right >= self.rect.right >= tile.rect.left:
+				self.collidingRight = True
+				self.rect = self.rect.move(-(self.rect.right - tile.rect.left), 0)
+			elif tile.rect.top <= self.rect.top <= tile.rect.bottom:
+				self.collidingUp = True
+				self.rect = self.rect.move(0, -(tile.rect.bottom - self.rect.top))
+			elif tile.rect.left <= self.rect.left <= tile.rect.right:
+				self.collidingLeft = True
+				self.rect = self.rect.move(-(self.rect.left - tile.rect.right), 0)
+				print("Moving")
+			elif tile.rect.bottom >= self.rect.bottom >= tile.rect.top:
+				self.collidingDown = True
+				self.falling = False # Stop falling
+				self.rect = self.rect.move(0, -(self.rect.bottom - tile.rect.top))

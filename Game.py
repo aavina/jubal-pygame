@@ -101,6 +101,9 @@ def main():
         # Check for collisions between player and environment
         collision_list = pygame.sprite.spritecollide(player, environment, False)
 
+        if len(collision_list) > 0:
+            player.determineCollisionDir(collision_list)
+
         # Update
         allsprites.update()
         environment.update()
