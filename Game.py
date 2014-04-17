@@ -5,6 +5,7 @@ from pygame.locals import *
 from Player import Player
 from Input import Input
 from Tile import Tile
+from Bullet import Bullet
 
 pygame.init()
 
@@ -98,15 +99,15 @@ def main():
         if keyinput.wasKeyPressed(K_UP):
             player.jump()
 
-        # Check for collisions between player and environment
-        collision_list = pygame.sprite.spritecollide(player, environment, False)
-
-        if len(collision_list) > 0:
-            player.determineCollisionDir(collision_list)
+        # Remove bullets that leave screen
+        for sprite in allsprites:
+            if isinstance(sprite, Bullet):
+                if sprite.rect[0] > SCREEN_X or sprite.rect[0] < 0:
+                    allsprites.remove(sprite)
 
         # Update
-        allsprites.update()
-        environment.update()
+        allsprites.update(environment)
+        environment.update(allsprites)
 
         # Draw
         allsprites.draw(DISPLAYSURF)

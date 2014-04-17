@@ -18,7 +18,7 @@ class Bullet(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 
 
-	def update(self):
+	def update(self, environment):
 		if self.direction == RIGHT:
 			newpos = self.rect.move(BULLETSPEED,0)
 			self.rect = newpos
