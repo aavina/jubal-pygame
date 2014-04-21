@@ -137,6 +137,7 @@ class Player(pygame.sprite.Sprite):
 				self.rect = newpos
 			else:
 				self.falling = False
+				moving = False
 
 		# Check vertical collision
 		if moving:
