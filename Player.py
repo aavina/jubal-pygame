@@ -98,10 +98,13 @@ class Player(pygame.sprite.Sprite):
 
 
 
-	# Check if moving vertically
-	# Sprite group environment is passed in to check for any collisions
+	# Check if moving vertically.
+	# Sprite group environment is passed in to check for any collisions.
+	# Also in charge of gravity
 	def checkVertical(self, environment):
 		moving = False
+		self.falling = True
+		img = None
 		
 		if self.jumping:
 			# Change to jumping sprite if not shooting
@@ -128,12 +131,12 @@ class Player(pygame.sprite.Sprite):
 					dirstr = 'j_rightface'
 				else:
 					dirstr = 'j_leftface'
-				self.image = self.imagesdict[dirstr]
+				img = self.imagesdict[dirstr]
 			oldpos, newpos = self.rect, self.rect.move((0,kJumpSpeed))
 			moving = True
 
 			# Let sprite fall until bounds are met
-			if self.rect[1] + kJumpSpeed + 64 <= 400:
+			if self.rect[1] + kJumpSpeed + 64 <= 400 and self.rect != newpos:
 				self.rect = newpos
 			else:
 				self.falling = False
@@ -147,10 +150,13 @@ class Player(pygame.sprite.Sprite):
 			if len(collision_list) > 0:
 				# Revert back to old position if there's a collision
 				self.rect = oldpos
-
+				
 				# If we're falling, stop
 				if self.falling:
 					self.falling = False
+			elif img != None:
+				self.image = img
+
 
 
 
