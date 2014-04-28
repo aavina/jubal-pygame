@@ -21,6 +21,8 @@ class Player(pygame.sprite.Sprite):
 		self.jumpClock = 0
 		self.direction = NONE
 
+		self.moved = False
+
 		self.image = self.imagesdict['j_rightface']
 		self.rect = self.image.get_rect()
 
@@ -45,46 +47,54 @@ class Player(pygame.sprite.Sprite):
 	def checkHorizontalAndShooting(self, environment):
 		moving = False
 		
-		if self.shooting and self.direction == LEFT:
-			if self.graphics['shoot_left'].isFinished():
-				self.shooting = False
-				self.bulletcreated = False
-				self.image = self.imagesdict['j_leftface']
-			else:
-				self.graphics['shoot_left'].play()
-				self.image = self.graphics['shoot_left'].getCurrentFrame()
-		        if self.graphics['shoot_left']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
-		            startx = self.rect[0]
-		            starty = self.rect[1] + 22
-		            bullet = Bullet(LEFT, self.imagesdict['bullet'])
-		            bullet.rect.topleft = startx, starty
-		            (self.groups())[0].add(bullet)
-		            self.bulletcreated = True
-		elif self.shooting and self.direction == RIGHT:
+		if self.shooting:
 			if self.graphics['shoot_right'].isFinished():
 				self.shooting = False
 				self.bulletcreated = False
 				self.image = self.imagesdict['j_rightface']
+				if self.direction == LEFT:
+					self.image = pygame.transform.flip(self.image, True, False)
+					oldpos, newpos = self.rect, self.rect.move(22,0)
+					moving = True
+					self.moved = False
 			else:
 				self.graphics['shoot_right'].play()
 				self.image = self.graphics['shoot_right'].getCurrentFrame()
+				if self.direction == LEFT:
+					self.image = pygame.transform.flip(self.image, True, False)
+					if not self.moved:
+						oldpos, newpos = self.rect, self.rect.move(-22,0)
+						moving = True
+						self.moved = True
+
+				# If first frame played already, need to create bullet
 		        if self.graphics['shoot_right']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
-		            startx = self.rect[0] + 64
-		            starty = self.rect[1] + 22
-		            bullet = Bullet(RIGHT, self.imagesdict['bullet'])
-		            bullet.rect.topleft = startx, starty
-		            (self.groups())[0].add(bullet)
-		            self.bulletcreated = True
-		elif self.direction == LEFT:
-			self.graphics['left_walk'].play()
-			self.image = self.graphics['left_walk'].getCurrentFrame()
-			oldpos, newpos = self.rect, self.rect.move((-kWalkSpeed,0))
-			moving = True
+		        	if self.direction == RIGHT:
+						startx = self.rect[0] + 64
+						starty = self.rect[1] + 19
+						bullet = Bullet(RIGHT, self.imagesdict['bullet'])
+						bullet.rect.topleft = startx, starty
+						(self.groups())[0].add(bullet)
+						self.bulletcreated = True
+			        else:
+						startx = self.rect[0]
+						starty = self.rect[1] + 19
+						bullet = Bullet(LEFT, self.imagesdict['bullet'])
+						bullet.rect.topleft = startx, starty
+						(self.groups())[0].add(bullet)
+						self.bulletcreated = True
+
 		elif self.direction == RIGHT:
 			self.graphics['right_walk'].play()
 			self.image = self.graphics['right_walk'].getCurrentFrame()
-			oldpos, newpos = self.rect, self.rect.move((kWalkSpeed,0))
+			oldpos, newpos = self.rect, self.rect.move(kWalkSpeed,0)
 			moving = True
+		elif self.direction == LEFT:
+			self.graphics['right_walk'].play()
+			self.image = pygame.transform.flip(self.graphics['right_walk'].getCurrentFrame(), True, False)
+			oldpos, newpos = self.rect, self.rect.move(-kWalkSpeed,0)
+			moving = True
+
 
 		# Check for horizontal collision
 		if moving:
@@ -110,12 +120,10 @@ class Player(pygame.sprite.Sprite):
 			# Change to jumping sprite if not shooting
 			if not self.shooting:
 				dirstr = ''
-				if self.facingRight:
-					dirstr = 'jump_right'
-				else:
-					dirstr = 'jump_left'
-				self.graphics[dirstr].play()
-				self.image = self.graphics[dirstr].getCurrentFrame()
+				self.graphics['jump_right'].play()
+				self.image = self.graphics['jump_right'].getCurrentFrame()
+				if not self.facingRight:
+					self.image = pygame.transform.flip(self.image, True, False)
 			# Set sprite to move
 			oldpos, newpos = self.rect, self.rect.move((0,-kJumpSpeed))
 			moving = True
@@ -127,20 +135,20 @@ class Player(pygame.sprite.Sprite):
 		elif self.falling:
 			# Change to facing sprite if not shooting
 			if not self.shooting:
-				if self.facingRight:
-					dirstr = 'j_rightface'
-				else:
-					dirstr = 'j_leftface'
-				img = self.imagesdict[dirstr]
+				img = self.imagesdict['j_rightface']
+				if not self.facingRight:
+					img = pygame.transform.flip(img, True, False)
+				
 			oldpos, newpos = self.rect, self.rect.move((0,kJumpSpeed))
 			moving = True
 
 			# Let sprite fall until bounds are met
-			if self.rect[1] + kJumpSpeed + 64 <= 400 and self.rect != newpos:
+			if self.rect[1] + kJumpSpeed + 60 <= 400 and self.rect != newpos:
 				self.rect = newpos
 			else:
 				self.falling = False
 				moving = False
+				self.graphics['jump_right'].stop()
 
 		# Check vertical collision
 		if moving:
@@ -186,11 +194,9 @@ class Player(pygame.sprite.Sprite):
 			self.bullet_sound.play()
 			self.shooting = True
 			# Set and start sprite animation
-			if self.facingRight:
-				self.graphics['shoot_right'].play()
-				self.image = self.graphics['shoot_right'].getCurrentFrame()
-				self.direction = RIGHT
-			else:
-				self.graphics['shoot_left'].play()
-				self.image = self.graphics['shoot_left'].getCurrentFrame()
+			self.graphics['shoot_right'].play()
+			self.image = self.graphics['shoot_right'].getCurrentFrame()
+			self.direction = RIGHT
+			if not self.facingRight:
+				self.image = pygame.transform.flip(self.image, True, False)
 				self.direction = LEFT

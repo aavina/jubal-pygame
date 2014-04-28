@@ -17,13 +17,13 @@ DURATION = 0.1
 SCREEN_X=400
 SCREEN_Y=400
 
-# This is the length of the sprite
+# This is the length of the sprite box
 LEN_SPRT_X=64
 LEN_SPRT_Y=64
 
-# This is where the sprite is found on the sheet
-SPRT_RECT_X=0
-SPRT_RECT_Y=LEN_SPRT_Y
+# Dimension of the player sprite
+DIM_SPRT_X = 24
+DIM_SPRT_Y = 60
 
 
 def main():
@@ -136,28 +136,26 @@ def DetermineAssets():
 def LoadSpriteAssets(SHEET):
     # Global dictionary that contains all static images
     IMAGESDICT = {
-        'j_normal': SHEET.subsurface(pygame.Rect(0, 0, LEN_SPRT_X, LEN_SPRT_Y)),
-        'j_rightface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X, SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-        'j_leftface': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*5), SPRT_RECT_Y, LEN_SPRT_X, LEN_SPRT_Y)),
-        'bullet': SHEET.subsurface(pygame.Rect(SPRT_RECT_X+(LEN_SPRT_X*8), SPRT_RECT_Y*3, 2, 2)),
-        'ground': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*4, SPRT_RECT_Y*5, LEN_SPRT_X, LEN_SPRT_Y/2)),
+        'j_normal': SHEET.subsurface(pygame.Rect(22, 2, 24, 60)),
+        'j_rightface': SHEET.subsurface(pygame.Rect(18, LEN_SPRT_Y + 4, DIM_SPRT_X, DIM_SPRT_Y)),
+        'bullet': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*8, LEN_SPRT_Y*3, 2, 2)),
+        'ground': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*4, LEN_SPRT_Y*5, LEN_SPRT_X, LEN_SPRT_Y/2)),
     }
 
+    IMAGESDICT['j_leftface'] = pygame.transform.flip(IMAGESDICT['j_rightface'], True, False)
+
     # Define the different animation types
-    animTypes = 'right_walk left_walk shoot_right shoot_left jump_right jump_left right_face left_face normal'.split()
+    animTypes = 'right_walk shoot_right jump_right'.split()
 
     # These tuples contain (base_x, base_y, numOfFrames)
     # numOfFrames is in the x-direction
     animTypesInfo = {
-        'right_walk':   (SPRT_RECT_X+LEN_SPRT_X, SPRT_RECT_Y, 4),
-        'left_walk':    (SPRT_RECT_X+(LEN_SPRT_X*6), SPRT_RECT_Y, 4),
-        'shoot_right':  (LEN_SPRT_X, 0, 4),
-        'shoot_left':   (LEN_SPRT_X*5, 0, 4),
-        'jump_right':   (0, LEN_SPRT_Y*2, 7),
-        'jump_left':    (0, LEN_SPRT_Y*3, 7),
-        'normal':       (0, 0, 1),
-        'right_face':   (0, LEN_SPRT_Y, 1),
-        'left_face':    (0, LEN_SPRT_Y*3, 1)
+        'right_walk':   (LEN_SPRT_X + 24, LEN_SPRT_Y + 4, 4),
+        'shoot_right':  (LEN_SPRT_X + 18, 4, 4),
+        'jump_right':   (0 + 18, (LEN_SPRT_Y*2) + 4, 7),
+        #'normal':       (0, 0, 1),
+        #'right_face':   (0, LEN_SPRT_Y, 1),
+        #'left_face':    (0, LEN_SPRT_Y*3, 1)
     }
 
     animObjs = {}
@@ -165,10 +163,15 @@ def LoadSpriteAssets(SHEET):
         xbase = (animTypesInfo[animType])[0]
         ybase = (animTypesInfo[animType])[1]
         numFrames = (animTypesInfo[animType])[2]
-        imagesAndDurations = [(SHEET.subsurface(pygame.Rect(xbase+(LEN_SPRT_X*num), ybase, LEN_SPRT_X, LEN_SPRT_Y)), DURATION) for num in range(numFrames)]
         loopforever = True
-        if(animType == 'shoot_right' or animType == 'shoot_left'):
+
+        if(animType == 'right_walk'):
+            imagesAndDurations = [(SHEET.subsurface(pygame.Rect(xbase+(LEN_SPRT_X*num), ybase, 18, DIM_SPRT_Y)), DURATION) for num in range(numFrames)]
+        elif(animType == 'shoot_right'):
             loopforever = False
+            imagesAndDurations = [(SHEET.subsurface(pygame.Rect(xbase+(LEN_SPRT_X*num), ybase, 46, LEN_SPRT_Y)), DURATION) for num in range(numFrames)]
+        elif(animType == 'jump_right'):
+            imagesAndDurations = [(SHEET.subsurface(pygame.Rect(xbase+(LEN_SPRT_X*num), ybase, 24, LEN_SPRT_Y)), DURATION) for num in range(numFrames)]
 
         animObjs[animType] = pyganim.PygAnimation(imagesAndDurations, loop=loopforever)
 
