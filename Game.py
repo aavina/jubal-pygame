@@ -41,26 +41,42 @@ def main():
     BLACK = (0,0,0)
 
     # Calculate starting position of player
-    startX = SCREEN_X - LEN_SPRT_X
-    startY = SCREEN_Y - LEN_SPRT_Y
+    startX, startY = SCREEN_X/2 - LEN_SPRT_X, SCREEN_Y - LEN_SPRT_Y
 
     # Hold info on keys pressed, held, released
     keyinput = Input()
 
     # Initialize gamemap and Player
     player = Player(IMAGESDICT, animObjs, bullet_sound_asset)
-    player.rect.topleft = startX, startY
+    player.rect.topleft = startX, 0
 
     # Add tiles
-    startx = 0
-    starty = SCREEN_Y - LEN_SPRT_Y/2
+    startx, starty = 0, SCREEN_Y - LEN_SPRT_Y/2
     tile = Tile(IMAGESDICT['ground'])
     tile.rect.topleft = startx, starty
-
-    # Sprite Groups
-    allsprites = pygame.sprite.RenderPlain(player)
     environment = pygame.sprite.RenderPlain(tile)
 
+    startx, starty = SCREEN_X - LEN_SPRT_X, SCREEN_Y - LEN_SPRT_Y/2
+    tile = Tile(IMAGESDICT['ground'])
+    tile.rect.topleft = startx, starty
+    environment.add(tile)
+
+    startx, starty = SCREEN_X/2 - LEN_SPRT_X, SCREEN_Y - LEN_SPRT_Y
+    tile = Tile(IMAGESDICT['ground'])
+    tile.rect.topleft = startx, starty
+    environment.add(tile)
+
+    startx, starty = SCREEN_X/2 + LEN_SPRT_X, SCREEN_Y - LEN_SPRT_Y*2
+    tile = Tile(IMAGESDICT['ground'])
+    tile.rect.topleft = startx, starty
+    environment.add(tile)
+
+
+
+
+    # Sprite group
+    allsprites = pygame.sprite.RenderPlain(player)
+    
     # Start game loop
     while True:
         # Clear key info
