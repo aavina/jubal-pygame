@@ -151,14 +151,15 @@ class Player(pygame.sprite.Sprite):
 			self.rect = newpos
 			collision_list = pygame.sprite.spritecollide(self, environment, False)
 			if len(collision_list) > 0:
+				# Check for special case of collision when shooting
 				if self.shooting and self.direction is LEFT:
-					oldpos2, newpos = self.rect, self.rect.move(22,0)
-					self.rect = newpos
+					newpos2 = self.rect.move(22,0)
+					self.rect = newpos2
 					collision_list = pygame.sprite.spritecollide(self, environment, False)
 					if len(collision_list) > 0:
 						self.rect = oldpos
 					else:
-						self.rect = oldpos2
+						self.rect = newpos
 
 				else:
 					# Revert back to old position if there's a collision
@@ -167,18 +168,18 @@ class Player(pygame.sprite.Sprite):
 					# If we're falling, stop
 					if self.falling:
 						self.falling = False
+			# Check special case of collision
 			elif self.shooting and self.direction is LEFT:
-				oldpos2, newpos = self.rect, self.rect.move(22,0)
-				self.rect = newpos
+				newpos2 = self.rect.move(22,0)
+				self.rect = newpos2
 				collision_list = pygame.sprite.spritecollide(self, environment, False)
 				if len(collision_list) > 0:
 					self.rect = oldpos
 				else:
-					self.rect = oldpos2
+					self.rect = newpos
 
 			elif img != None:
 				self.image = img
-
 
 
 
