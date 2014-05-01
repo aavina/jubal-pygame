@@ -42,7 +42,6 @@ class Player(pygame.sprite.Sprite):
 			self.image = self.imagesdict['j_leftface']
 
 
-
 	# Check if moving horizontally or shooting
 	def checkHorizontalAndShooting(self, environment):
 		moving = False
@@ -54,8 +53,7 @@ class Player(pygame.sprite.Sprite):
 				self.image = self.imagesdict['j_rightface']
 				if self.direction == LEFT:
 					self.image = pygame.transform.flip(self.image, True, False)
-					oldpos, newpos = self.rect, self.rect.move(22,0)
-					moving = True
+					self.rect.move_ip(22,0)
 					self.moved = False
 			else:
 				self.graphics['shoot_right'].play()
@@ -63,8 +61,7 @@ class Player(pygame.sprite.Sprite):
 				if self.direction == LEFT:
 					self.image = pygame.transform.flip(self.image, True, False)
 					if not self.moved:
-						oldpos, newpos = self.rect, self.rect.move(-22,0)
-						moving = True
+						self.rect.move_ip(-22,0)
 						self.moved = True
 
 				# If first frame played already, need to create bullet
@@ -156,12 +153,31 @@ class Player(pygame.sprite.Sprite):
 			self.rect = newpos
 			collision_list = pygame.sprite.spritecollide(self, environment, False)
 			if len(collision_list) > 0:
-				# Revert back to old position if there's a collision
-				self.rect = oldpos
-				
-				# If we're falling, stop
-				if self.falling:
-					self.falling = False
+				if self.shooting and self.direction is LEFT:
+					oldpos2, newpos = self.rect, self.rect.move(22,0)
+					self.rect = newpos
+					collision_list = pygame.sprite.spritecollide(self, environment, False)
+					if len(collision_list) > 0:
+						self.rect = oldpos
+					else:
+						self.rect = oldpos2
+
+				else:
+					# Revert back to old position if there's a collision
+					self.rect = oldpos
+					
+					# If we're falling, stop
+					if self.falling:
+						self.falling = False
+			elif self.shooting and self.direction is LEFT:
+				oldpos2, newpos = self.rect, self.rect.move(22,0)
+				self.rect = newpos
+				collision_list = pygame.sprite.spritecollide(self, environment, False)
+				if len(collision_list) > 0:
+					self.rect = oldpos
+				else:
+					self.rect = oldpos2
+
 			elif img != None:
 				self.image = img
 
@@ -169,13 +185,17 @@ class Player(pygame.sprite.Sprite):
 
 
 	def moveLeft(self):
-		self.direction = LEFT
-		self.facingRight = False
+		# Can't turn if shooting
+		if not self.shooting:
+			self.direction = LEFT
+			self.facingRight = False
 
 
 	def moveRight(self):
-		self.direction = RIGHT
-		self.facingRight = True
+		# Can't turn if shooting
+		if not self.shooting:
+			self.direction = RIGHT
+			self.facingRight = True
 
 
 	def stopMoving(self):
