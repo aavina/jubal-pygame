@@ -68,15 +68,13 @@ class Player(pygame.sprite.Sprite):
 				# If first frame played already, need to create bullet
 		        if self.graphics['shoot_right']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
 		        	if self.direction == RIGHT:
-						startx = self.rect[0] + 64
-						starty = self.rect[1] + 19
+						startx, starty = self.rect[0] + 64, self.rect[1] + 19
 						bullet = Bullet(RIGHT, self.imagesdict['bullet'])
 						bullet.rect.topleft = startx, starty
 						(self.groups())[0].add(bullet)
 						self.bulletcreated = True
 			        else:
-						startx = self.rect[0]
-						starty = self.rect[1] + 19
+						startx, starty = self.rect[0], self.rect[1] + 19
 						bullet = Bullet(LEFT, self.imagesdict['bullet'])
 						bullet.rect.topleft = startx, starty
 						(self.groups())[0].add(bullet)
@@ -131,9 +129,9 @@ class Player(pygame.sprite.Sprite):
 				self.jumping = False
 				self.falling = True
 		elif self.falling:
-			# Change to facing sprite if not shooting
+			# Change to falling sprite if not shooting
 			if not self.shooting:
-				img = self.imagesdict['j_rightface']
+				img = self.graphics['jump_right'].getFrame(2)
 				if not self.facingRight:
 					img = pygame.transform.flip(img, True, False)
 				
@@ -150,7 +148,6 @@ class Player(pygame.sprite.Sprite):
 
 		# Check vertical collision
 		if moving:
-			moving = False
 			self.rect = newpos
 			collision_list = pygame.sprite.spritecollide(self, environment, False)
 			if len(collision_list) > 0:
