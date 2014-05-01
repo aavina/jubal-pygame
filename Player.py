@@ -21,7 +21,8 @@ class Player(pygame.sprite.Sprite):
 		self.jumpClock = 0
 		self.direction = NONE
 
-		self.moved = False
+		# Tells if sprite is currently compensating for left-shoot collision detection
+		self.move_shoot = False
 
 		self.image = self.imagesdict['j_rightface']
 		self.rect = self.image.get_rect()
@@ -54,15 +55,15 @@ class Player(pygame.sprite.Sprite):
 				if self.direction == LEFT:
 					self.image = pygame.transform.flip(self.image, True, False)
 					self.rect.move_ip(22,0)
-					self.moved = False
+					self.move_shoot = False
 			else:
 				self.graphics['shoot_right'].play()
 				self.image = self.graphics['shoot_right'].getCurrentFrame()
 				if self.direction == LEFT:
 					self.image = pygame.transform.flip(self.image, True, False)
-					if not self.moved:
+					if not self.move_shoot:
 						self.rect.move_ip(-22,0)
-						self.moved = True
+						self.move_shoot = True
 
 				# If first frame played already, need to create bullet
 		        if self.graphics['shoot_right']._propGetCurrentFrameNum() == 1 and not self.bulletcreated:
