@@ -56,29 +56,11 @@ def main():
     player = Player(IMAGESDICT, animObjs, bullet_sound_asset)
     player.rect.topleft = startX, 0
 
-    # Add tiles
-    startx, starty = 0, SCREEN_Y - LEN_SPRT_Y/2
-    tile = Tile(IMAGESDICT['ground'])
-    tile.rect.topleft = startx, starty
-    environment = pygame.sprite.RenderPlain(tile)
+    # Create map sprite group
+    environment = pygame.sprite.Group()
 
-    startx, starty = SCREEN_X - LEN_SPRT_X, SCREEN_Y - LEN_SPRT_Y/2
-    tile = Tile(IMAGESDICT['ground'])
-    tile.rect.topleft = startx, starty
-    environment.add(tile)
-
-    startx, starty = SCREEN_X/2 - LEN_SPRT_X, SCREEN_Y - LEN_SPRT_Y
-    tile = Tile(IMAGESDICT['ground'])
-    tile.rect.topleft = startx, starty
-    environment.add(tile)
-
-    startx, starty = SCREEN_X/2 + LEN_SPRT_X, SCREEN_Y - LEN_SPRT_Y*2
-    tile = Tile(IMAGESDICT['ground'])
-    tile.rect.topleft = startx, starty
-    environment.add(tile)
-
-
-
+    # Open and parse map file
+    parseMap(IMAGESDICT, environment)
 
     # Sprite group
     allsprites = pygame.sprite.RenderPlain(player)
@@ -141,6 +123,28 @@ def main():
         fpsClock.tick(FPS)
 
 
+# Parses a map file and creates the game map from it
+def parseMap(IMAGESDICT, environment):
+    # Open the map
+    f = open('map1.txt', 'r')
+    # Set start points
+    baseX, baseY = 0, 0
+    count = 0
+
+    for line in f:
+        baseX = 0
+        for char in line:
+            if char == 'g':
+                # Add ground tile here
+                startx, starty = baseX*32, baseY*32
+                tile = Tile(IMAGESDICT['ground'])
+                tile.rect.topleft = startx, starty
+                environment.add(tile)
+            baseX += 1
+        baseY += 1
+    f.close()
+
+
 # Determines what filesystem accessor to use and retreives graphic and sound assets
 def DetermineAssets():
     # Find out if in Windows or Unix/Linux then load SpriteSheet
@@ -160,7 +164,7 @@ def LoadSpriteAssets(SHEET):
     IMAGESDICT = {
         'j_rightface': SHEET.subsurface(pygame.Rect(OFFSET_X, LEN_SPRT_Y + 4, SPRITE_WIDTH, SPRITE_HEIGHT)),
         'bullet': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*8, LEN_SPRT_Y*3, 2, 2)),
-        'ground': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*4, LEN_SPRT_Y*5, LEN_SPRT_X, LEN_SPRT_Y/2)),
+        'ground': SHEET.subsurface(pygame.Rect(LEN_SPRT_X*4, LEN_SPRT_Y*5, LEN_SPRT_X/2, LEN_SPRT_Y/2)),
     }
 
     IMAGESDICT['j_leftface'] = pygame.transform.flip(IMAGESDICT['j_rightface'], True, False)
