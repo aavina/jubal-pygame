@@ -6,6 +6,12 @@ kWalkSpeed = 3
 kJumpSpeed = 4
 kJumpClockDelay = 500
 
+# Character colors
+RED_CHARACTER_COLOR = pygame.Color(170, 41, 41, 255)
+BLUE_CHARACTER_COLOR = pygame.Color(41, 48, 170, 255)
+
+
+
 class Player(pygame.sprite.Sprite):
 	def __init__(self, imagesdict, graphics, bullet_sound):
 		pygame.sprite.Sprite.__init__(self)
@@ -27,9 +33,10 @@ class Player(pygame.sprite.Sprite):
 		self.image = self.imagesdict['j_rightface']
 		self.rect = self.image.get_rect()
 
+		self.currentColor = RED_CHARACTER_COLOR
+
 
 	def update(self, environment):
-
 		# Check horizontal and shooting movement
 		self.checkHorizontalAndShooting(environment)
 
@@ -42,11 +49,24 @@ class Player(pygame.sprite.Sprite):
 		elif self.direction == NONE and not self.facingRight and not self.shooting and not self.jumping and not self.falling:
 			self.image = self.imagesdict['j_leftface']
 
+		# Change the colors for the current surface image
+		pixarr = pygame.PixelArray(self.image)
+		if self.currentColor == RED_CHARACTER_COLOR:
+			pixarr.replace(BLUE_CHARACTER_COLOR, RED_CHARACTER_COLOR)
+		else:
+			pixarr.replace(RED_CHARACTER_COLOR, BLUE_CHARACTER_COLOR)
+		del pixarr # Must delete or else surface will be locked
+
+	def toggleColor(self):
+		if self.currentColor == RED_CHARACTER_COLOR:
+			self.currentColor = BLUE_CHARACTER_COLOR
+		else:
+			self.currentColor = RED_CHARACTER_COLOR
 
 	# Check if moving horizontally or shooting
 	def checkHorizontalAndShooting(self, environment):
 		moving = False
-		
+
 		if self.shooting:
 			if self.graphics['shoot_right'].isFinished():
 				self.shooting = False
@@ -111,7 +131,7 @@ class Player(pygame.sprite.Sprite):
 		moving = False
 		self.falling = True
 		img = None
-		
+
 		if self.jumping:
 			# Change to jumping sprite if not shooting
 			if not self.shooting:
@@ -134,7 +154,7 @@ class Player(pygame.sprite.Sprite):
 				img = self.graphics['jump_right'].getFrame(2)
 				if not self.facingRight:
 					img = pygame.transform.flip(img, True, False)
-				
+
 			oldpos, newpos = self.rect, self.rect.move((0,kJumpSpeed))
 			moving = True
 
@@ -164,7 +184,7 @@ class Player(pygame.sprite.Sprite):
 				else:
 					# Revert back to old position if there's a collision
 					self.rect = oldpos
-					
+
 					# If we're falling, stop
 					if self.falling:
 						self.falling = False
