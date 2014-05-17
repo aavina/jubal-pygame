@@ -64,6 +64,15 @@ def main():
 
     # Sprite group
     allsprites = pygame.sprite.RenderPlain(player)
+
+    # Set Colors to change from and to
+    fromColor = pygame.Color(170, 41, 41, 255)
+    toColor = pygame.Color(41, 48, 170, 255)
+
+    # Change the colors for the current surface image
+    pixarr = pygame.PixelArray(player.image)
+    pixarr.replace(fromColor, toColor)
+    del pixarr # Must delete or else surface will be locked
     
     # Start game loop
     while True:
