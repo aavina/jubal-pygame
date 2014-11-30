@@ -16,3 +16,6 @@ Simply change directory to the jubal game folder and run
 + Enemies
 + Local Multiplayer
 + Online Multiplayer(?)
+
+### Sources Cited:
+Uses Pyganim: http://inventwithpython.com/pyganim/
